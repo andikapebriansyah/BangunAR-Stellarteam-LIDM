@@ -1,44 +1,15 @@
 'use client';
 import { useEffect, useRef } from 'react';
 
-export default function ARViewer({ isARActive }) {
+export default function ARViewer({ isARActive, modelSrc, modelAlt, hotspots }) {
   const modelViewerRef = useRef();
-  const hotspots = [
-  {
-    id: 'height',
-    position: '-1 2m 0m',   // sisi kanan, sepanjang tinggi
-    normal: '0 0 1',
-    label: 'h = tinggi silinder'
-  },
-  {
-    id: 'radius',
-    position: '0 1m 0',      // arah horizontal dari pusat alas
-    normal: '1 0 0',
-    label: 'r = jari-jari alas'
-  },
-  {
-    id: 'volume',
-    position: '0 2m 0',      // tengah silinder
-    normal: '0 1 0',
-    label: 'V = π × r² × h'
-  },
-  {
-    id: 'surface',
-    position: '0 1m -1m',  // sisi kiri tengah
-    normal: '-1 0 0',
-    label: 'L = 2πr(r + h)'
-  }
-];
-
 
   useEffect(() => {
-    // Load model-viewer dynamically
     if (typeof window !== 'undefined') {
       const script = document.createElement('script');
       script.type = 'module';
       script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js';
       document.head.appendChild(script);
-      
       return () => {
         document.head.removeChild(script);
       };
@@ -55,8 +26,8 @@ export default function ARViewer({ isARActive }) {
     }`}>
       <model-viewer
         ref={modelViewerRef}
-        src="/models/Cylinder.glb"
-        alt="Silinder 3D"
+        src={modelSrc}
+        alt={modelAlt}
         camera-controls
         auto-rotate
         auto-rotate-delay="3000"
@@ -76,8 +47,9 @@ export default function ARViewer({ isARActive }) {
         style={{
           '--poster-color': 'transparent'
         }}
+        
       >
-        {hotspots.map((hotspot, index) => (
+        {hotspots?.map((hotspot, index) => (
           <button
             key={hotspot.id}
             slot={`hotspot-${hotspot.id}`}
