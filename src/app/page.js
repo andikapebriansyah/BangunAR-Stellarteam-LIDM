@@ -2,11 +2,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import ARShapeSelector from "../components/ui/ARShapeSelector";
 
 export default function Home() {
   const [completedChallenges, setCompletedChallenges] = useState(0);
   const [completedQuizzes, setCompletedQuizzes] = useState(0);
   const [completedMaterials, setCompletedMaterials] = useState(0);
+  const [showARSelector, setShowARSelector] = useState(false);
 
   // Load progress from localStorage
   useEffect(() => {
@@ -61,9 +63,19 @@ export default function Home() {
               <p className="text-purple-100 text-sm">Kelas 8A</p>
             </div>
           </div>
-          <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full flex items-center space-x-2">
-            <span className="text-yellow-300">⭐</span>
-            <span className="font-semibold">1,250</span>
+          <div className="flex items-center space-x-3">
+            {/* Quick AR Access */}
+            <button 
+              onClick={() => setShowARSelector(true)}
+              className="bg-white bg-opacity-15 p-2 rounded-xl hover:bg-opacity-25 transition-all"
+              title="Quick AR Access"
+            >
+              <span className="text-xl">🥽</span>
+            </button>
+            <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full flex items-center space-x-2">
+              <span className="text-yellow-300">⭐</span>
+              <span className="font-semibold">1,250</span>
+            </div>
           </div>
         </div>
         
@@ -133,17 +145,20 @@ export default function Home() {
         </div>
 
         {/* AR Mode Card */}
-        <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-2xl p-6 text-white">
+        <div 
+          onClick={() => setShowARSelector(true)}
+          className="bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-2xl p-6 text-white cursor-pointer hover:scale-105 transition-transform"
+        >
           <div className="text-center">
             <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
               <span className="text-white text-2xl">🥽</span>
             </div>
-            <h3 className="text-xl font-bold mb-2">AR Mode</h3>
+            <h3 className="text-xl font-bold mb-2">AR Experience</h3>
             <p className="text-purple-100 text-sm mb-4 leading-relaxed">
-              Jelajahi bangun ruang dengan Augmented Reality dan rasakan pengalaman belajar yang menakjubkan
+              Jelajahi berbagai bangun ruang dengan Augmented Reality dan rasakan pengalaman belajar yang menakjubkan
             </p>
             <button className="bg-white bg-opacity-20 px-6 py-2 rounded-full text-sm font-medium hover:bg-opacity-30 transition-colors">
-              Segera Hadir
+              Mulai AR Experience →
             </button>
           </div>
         </div>
@@ -210,6 +225,12 @@ export default function Home() {
           </button>
         </div>
       </div>
+
+      {/* AR Shape Selector Modal */}
+      <ARShapeSelector 
+        isOpen={showARSelector} 
+        onClose={() => setShowARSelector(false)} 
+      />
     </div>
   );
 }
