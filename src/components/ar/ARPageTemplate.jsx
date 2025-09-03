@@ -1,13 +1,13 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ARViewer from './ARViewer.jsx';
-import ARControls from './ARControls.jsx';
+import ARViewer from './ARViewer';
+import ARControls from './ARControls';
 
-export default function ARCylinderPage() {
+export default function ARPageTemplate({ title, subtitle, modelSrc, modelAlt, hotspots, controls }) {
   const router = useRouter();
   const [isARActive, setIsARActive] = useState(false);
-  const [activeTab, setActiveTab] = useState('volume');
+  const [activeTab, setActiveTab] = useState(controls[0]?.id || '');
   const [showARStatus, setShowARStatus] = useState(false);
 
   const toggleAR = () => {
@@ -91,32 +91,17 @@ export default function ARCylinderPage() {
 
       {/* Info Panel */}
       <div className="relative z-20 mx-5 mb-5 bg-blue-900/95 backdrop-blur-md rounded-xl p-5 border border-blue-400/30 shadow-lg">
-        <div className="text-blue-400 text-lg font-bold mb-1">SILINDER</div>
-        <div className="text-blue-300 text-sm mb-4">Bangun Ruang 3D</div>
-        
-        <ul className="space-y-2">
-          {[
-            'Sentuh untuk mempelajari lebih',
-            'Putar untuk memperview/menerjemahkan', 
-            'Gunakan pinch gesture untuk melihat detail berbeda'
-          ].map((text, index) => (
-            <li key={index} className="flex items-center text-sm">
-              <div className="w-4 h-4 bg-green-500 rounded-full mr-3 flex items-center justify-center text-xs">
-                ✓
-              </div>
-              {text}
-            </li>
-          ))}
-        </ul>
+        <div className="text-blue-400 text-lg font-bold mb-1">{title}</div>
+        <div className="text-blue-300 text-sm mb-4">{subtitle}</div>
       </div>
 
       {/* AR Viewer */}
       <div className="flex-1 relative z-10 mx-5">
-        <ARViewer isARActive={isARActive} />
+        <ARViewer isARActive={isARActive} modelSrc={modelSrc} modelAlt={modelAlt} hotspots={hotspots} />
       </div>
 
       {/* Controls */}
-      <ARControls activeTab={activeTab} setActiveTab={setActiveTab} />
+      <ARControls activeTab={activeTab} setActiveTab={setActiveTab} tabs={controls} />
 
       {/* AR Status */}
       {showARStatus && (
