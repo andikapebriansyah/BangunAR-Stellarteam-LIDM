@@ -21,16 +21,28 @@ export default function MateriPembelajaran() {
 
   const materiList = [
     {
-      id: 'pengantar-bangun-ruang',
+      id: 'pengantar',
       title: 'Pengantar Bangun Ruang',
-      subtitle: 'Rangkuman Dasar Bangun Datar & Bangun Ruang Sisi Datar',
-      description: 'Pelajari konsep dasar bangun datar dan bangun ruang sisi datar sebagai fondasi memahami bangun ruang sisi lengkung',
+      subtitle: 'Dasar Bangun Datar & Bangun Ruang',
+      description: 'Dasar-dasar bentuk bangun datar, bangun ruang sisi datar, dan perkenalan ke bangun ruang sisi lengkung.',
       icon: '📐',
       color: 'from-gray-400 to-slate-400',
-      topicCount: 8,
-      estimatedTime: 25,
+      topicCount: 4, // sesuai jumlah topik di bawah
+      estimatedTime: 20,
       status: 'available',
       difficulty: 'Dasar'
+    },
+    {
+      id: 'tabung',
+      title: 'Tabung (Silinder)',
+      subtitle: 'Bangun Ruang Sisi Lengkung',
+      description: 'Pelajari sifat, unsur, jaring-jaring, luas permukaan, dan volume tabung secara interaktif.',
+      icon: '🥫',
+      color: 'from-blue-400 to-cyan-400',
+      topicCount: 5,
+      estimatedTime: 40,
+      status: 'available',
+      difficulty: 'Sedang'
     },
     {
       id: 'bola',
@@ -41,18 +53,6 @@ export default function MateriPembelajaran() {
       color: 'from-red-400 to-pink-400',
       topicCount: 6,
       estimatedTime: 45,
-      status: 'available',
-      difficulty: 'Mudah'
-    },
-    {
-      id: 'tabung',
-      title: 'Tabung (Silinder)',
-      subtitle: 'Bangun Ruang Sisi Lengkung',
-      description: 'Pelajari sifat-sifat, jari-jari, tinggi, luas permukaan dan volume tabung dengan model 3D interaktif',
-      icon: '🥫',
-      color: 'from-blue-400 to-cyan-400',
-      topicCount: 7,
-      estimatedTime: 50,
       status: 'locked',
       difficulty: 'Sedang'
     },
