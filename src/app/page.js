@@ -6,8 +6,8 @@ import ARShapeSelector from "../components/ui/ARShapeSelector";
 
 export default function Home() {
   const [completedChallenges, setCompletedChallenges] = useState(0);
-  const [completedQuizzes, setCompletedQuizzes] = useState(0);
   const [completedMaterials, setCompletedMaterials] = useState(0);
+  const [diagnosticCompleted, setDiagnosticCompleted] = useState(false);
   const [showARSelector, setShowARSelector] = useState(false);
 
   // Load progress from localStorage
@@ -18,16 +18,15 @@ export default function Home() {
       setCompletedChallenges(challengeSet.size);
     }
 
-    const quizResults = localStorage.getItem('quizResults');
-    if (quizResults) {
-      const quizData = JSON.parse(quizResults);
-      setCompletedQuizzes(Object.keys(quizData).length);
-    }
-
     const materials = localStorage.getItem('completedMaterials');
     if (materials) {
       const materialSet = new Set(JSON.parse(materials));
       setCompletedMaterials(materialSet.size);
+    }
+
+    const diagnostic = localStorage.getItem('diagnosticTest');
+    if (diagnostic) {
+      setDiagnosticCompleted(true);
     }
   }, []);
 
@@ -39,11 +38,12 @@ export default function Home() {
       localStorage.removeItem('completedTopics');
       localStorage.removeItem('challengeScores');
       localStorage.removeItem('lastBuildResult');
+      localStorage.removeItem('diagnosticTest');
       
       // Reset state
       setCompletedChallenges(0);
-      setCompletedQuizzes(0);
       setCompletedMaterials(0);
+      setDiagnosticCompleted(false);
       
       alert('Semua data telah dihapus!');
     }
@@ -63,17 +63,18 @@ export default function Home() {
               <p className="text-purple-100 text-sm">Kelas 8A</p>
             </div>
           </div>
-          <div className="flex items-center space-x-3">
-            {/* Quick AR Access - Khusus tempat AR saja */}
-            <button 
-              onClick={() => setShowARSelector(true)}
-              className="bg-white bg-opacity-15 px-4 py-2 rounded-xl hover:bg-opacity-25 transition-all flex items-center space-x-2"
-              title="Quick AR Access"
-            >
-              <span className="text-xl">🥽</span>
-              <span className="text-sm font-medium">AR</span>
-            </button>
-          </div>
+          
+          {/* AR Button - Fixed with better visibility */}
+          <button 
+            onClick={() => setShowARSelector(true)}
+            className="bg-white bg-opacity-20 border-2 border-white px-3 py-2 rounded-xl hover:bg-opacity-30 transition-all"
+            title="Quick AR Access"
+          >
+            <div className="text-center text-white">
+              <div className="text-lg">🥽</div>
+              <div className="text-xs font-medium">AR</div>
+            </div>
+          </button>
         </div>
         
         <div className="mt-6">
@@ -84,7 +85,7 @@ export default function Home() {
 
       <div className="px-6 py-6 space-y-6">
         {/* Progress Stats */}
-        <div className="grid grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
             <div className="w-10 h-10 bg-teal-500 rounded-2xl mx-auto mb-2 flex items-center justify-center">
               <span className="text-white text-sm">📚</span>
@@ -100,21 +101,35 @@ export default function Home() {
             <div className="text-lg font-bold text-gray-800">{completedChallenges}</div>
             <p className="text-gray-500 text-xs">Build Selesai</p>
           </div>
-
-          <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
-            <div className="w-10 h-10 bg-purple-500 rounded-2xl mx-auto mb-2 flex items-center justify-center">
-              <span className="text-white text-sm">🧠</span>
-            </div>
-            <div className="text-lg font-bold text-gray-800">{completedQuizzes}</div>
-            <p className="text-gray-500 text-xs">Kuis Selesai</p>
-          </div>
         </div>
 
-        {/* Menu Grid - Materi dan Build Challenge sama lebar */}
+        {/* Tes Diagnostik - Fixed button visibility */}
+        <Link href="/tes-diagnostik">
+          <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                <span className="text-white text-2xl">🔍</span>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Tes Diagnostik</h3>
+              <p className="text-indigo-100 text-sm mb-4 leading-relaxed">
+                {diagnosticCompleted ? 
+                  'Tes diagnostik telah selesai. Anda siap melanjutkan pembelajaran!' :
+                  'Mulai dengan tes diagnostik untuk mengetahui tingkat pemahaman Anda'
+                }
+              </p>
+              {/* Fixed button with better contrast */}
+              <div className="bg-white text-purple-600 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
+                {diagnosticCompleted ? 'Lihat Hasil →' : 'Mulai Tes →'}
+              </div>
+            </div>
+          </div>
+        </Link>
+
+        {/* Materi dan Build Challenge - Grid 2 kolom */}
         <div className="grid grid-cols-2 gap-4">
           {/* Materi Pembelajaran */}
           <Link href="/materi-pembelajaran">
-            <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full">
+            <div className={`bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full ${!diagnosticCompleted ? 'opacity-60 pointer-events-none' : ''}`}>
               <div className="w-12 h-12 bg-red-400 rounded-2xl mb-3 flex items-center justify-center">
                 <span className="text-white text-lg">📖</span>
               </div>
@@ -122,13 +137,18 @@ export default function Home() {
               <p className="text-gray-500 text-xs mb-3 leading-relaxed">
                 Pelajari bangun ruang dengan visualisasi 3D
               </p>
-              <span className="text-red-500 text-xs font-medium">Mulai Belajar →</span>
+              <div className="flex items-center justify-between">
+                <div className={`text-xs font-medium ${!diagnosticCompleted ? 'text-gray-400' : 'text-red-500'}`}>
+                  {!diagnosticCompleted ? 'Selesaikan tes dulu' : 'Mulai Belajar →'}
+                </div>
+                {!diagnosticCompleted && <span className="text-gray-400 text-xs">🔒</span>}
+              </div>
             </div>
           </Link>
 
           {/* Build Challenge */}
           <Link href="/build-challenge-selection">
-            <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full">
+            <div className={`bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full ${!diagnosticCompleted ? 'opacity-60 pointer-events-none' : ''}`}>
               <div className="w-12 h-12 bg-teal-400 rounded-2xl mb-3 flex items-center justify-center">
                 <span className="text-white text-lg">🎮</span>
               </div>
@@ -136,12 +156,17 @@ export default function Home() {
               <p className="text-gray-500 text-xs mb-3 leading-relaxed">
                 Game edukatif drag & drop bangun ruang
               </p>
-              <span className="text-teal-500 text-xs font-medium">Mulai Build →</span>
+              <div className="flex items-center justify-between">
+                <div className={`text-xs font-medium ${!diagnosticCompleted ? 'text-gray-400' : 'text-teal-500'}`}>
+                  {!diagnosticCompleted ? 'Selesaikan tes dulu' : 'Mulai Build →'}
+                </div>
+                {!diagnosticCompleted && <span className="text-gray-400 text-xs">🔒</span>}
+              </div>
             </div>
           </Link>
         </div>
 
-        {/* Evaluasi Card */}
+        {/* Evaluasi Card - Fixed button visibility */}
         <Link href="/evaluasi">
           <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
             <div className="text-center">
@@ -152,9 +177,10 @@ export default function Home() {
               <p className="text-orange-100 text-sm mb-4 leading-relaxed">
                 Lihat progress pembelajaran dan hasil evaluasi untuk memahami perkembangan Anda
               </p>
-              <span className="inline-block bg-white bg-opacity-20 px-6 py-2 rounded-full text-sm font-medium text-white drop-shadow-md">
+              {/* Fixed button with better contrast */}
+              <div className="bg-white text-orange-600 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
                 Mulai Evaluasi →
-              </span>
+              </div>
             </div>
           </div>
         </Link>
@@ -168,7 +194,9 @@ export default function Home() {
           <p className="text-gray-500 text-xs mb-3 leading-relaxed">
             Masuk ke kelas dengan kode dari guru dan belajar bersama teman
           </p>
-          <button className="text-orange-500 text-xs font-medium">Masuk Kelas →</button>
+          <button className="text-orange-500 text-xs font-medium hover:text-orange-600 transition-colors">
+            Masuk Kelas →
+          </button>
         </div>
 
         {/* Debug Button - Development Only */}
@@ -190,4 +218,3 @@ export default function Home() {
     </div>
   );
 }
-  
