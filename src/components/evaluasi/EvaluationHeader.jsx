@@ -12,12 +12,11 @@ const EvaluationHeader = ({ progress, totalQuestions, score }) => {
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-4">
           <Link href="/">
-            <button className="flex items-center space-x-2 bg-white bg-opacity-20 hover:bg-opacity-30 transition-all duration-200 px-3 py-2 rounded-lg text-white">
-              <ChevronLeft className="w-4 h-4" />
+            <button className="bg-white text-blue-400 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
               <span className="text-sm font-medium">Kembali</span>
             </button>
           </Link>
-          <div className="bg-white bg-opacity-20 rounded-full px-4 py-2 backdrop-blur-sm">
+          <div className="bg-white text-blue-400 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
             <span className="text-sm font-medium">{progress}/{totalQuestions}</span>
           </div>
         </div>

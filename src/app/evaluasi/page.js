@@ -1,211 +1,309 @@
 'use client';
-import React, { useState } from 'react';
+import Link from "next/link";
+import { useState, useEffect } from "react";
 
-// Import components
-import EvaluationHeader from '../../components/evaluasi/EvaluationHeader';
-import ProgressBar from '../../components/evaluasi/ProgressBar';
-import QuestionCard from '../../components/evaluasi/QuestionCard';
-import SphereCubeInteractive from '../../components/evaluasi/SphereCubeInteractive';
-import ActionButtons from '../../components/evaluasi/ActionButtons';
+export default function EvaluasiPage() {
+  const [completedMaterials, setCompletedMaterials] = useState(new Set());
+  const [completedEvaluations, setCompletedEvaluations] = useState(new Set());
+  const [progressData, setProgressData] = useState({});
 
-// Hint Component (new addition)
-import { Lightbulb } from 'lucide-react';
+  // Load progress from localStorage
+  useEffect(() => {
+    // Check completed materials
+    const materials = new Set();
+    
+    // Check tabung completion
+    const tabungProgress = localStorage.getItem('tabungProgress');
+    if (tabungProgress) {
+      const tabungData = JSON.parse(tabungProgress);
+      if (tabungData.completed) {
+        materials.add('tabung');
+      }
+    }
+    
+    // Check other materials (bola, kerucut) - placeholder for future
+    const bolaCompleted = localStorage.getItem('bolaProgress');
+    if (bolaCompleted && JSON.parse(bolaCompleted).completed) {
+      materials.add('bola');
+    }
+    
+    const kerucutCompleted = localStorage.getItem('kerucutProgress');
+    if (kerucutCompleted && JSON.parse(kerucutCompleted).completed) {
+      materials.add('kerucut');
+    }
+    
+    setCompletedMaterials(materials);
+    
+    // Load completed evaluations
+    const savedEvaluations = localStorage.getItem('completedEvaluations');
+    if (savedEvaluations) {
+      setCompletedEvaluations(new Set(JSON.parse(savedEvaluations)));
+    }
+    
+    // Load evaluation progress
+    const evalProgress = localStorage.getItem('evaluationProgress');
+    if (evalProgress) {
+      setProgressData(JSON.parse(evalProgress));
+    }
+  }, []);
 
-const HintCard = ({ hint, isVisible, onToggle }) => {
-  if (!hint) return null;
-  
-  return (
-    <div className="mx-4 sm:mx-6 mb-4">
-      <button
-        onClick={onToggle}
-        className="flex items-center space-x-3 text-orange-600 hover:text-orange-700 mb-3 bg-orange-50 hover:bg-orange-100 transition-all duration-200 px-4 py-2 rounded-lg border border-orange-200"
-      >
-        <div className="bg-orange-200 p-1 rounded-full">
-          <Lightbulb className="w-4 h-4 text-orange-600" />
-        </div>
-        <span className="text-sm font-semibold">
-          {isVisible ? 'Sembunyikan Petunjuk' : 'Butuh Petunjuk?'}
-        </span>
-      </button>
-      
-      {isVisible && (
-        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border-2 border-orange-200 rounded-xl p-4 sm:p-5 relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-16 h-16 bg-orange-200 bg-opacity-50 rounded-full -translate-y-8 translate-x-8"></div>
-          <div className="relative z-10">
-            <div className="flex items-start space-x-3">
-              <div className="bg-orange-400 p-2 rounded-full">
-                <Lightbulb className="w-4 h-4 text-white" />
+  const evaluasiList = [
+    {
+      id: 'tabung',
+      title: 'Evaluasi Tabung',
+      subtitle: 'Bangun Ruang Sisi Lengkung',
+      description: 'Uji pemahaman kamu tentang sifat, unsur, luas permukaan, dan volume tabung.',
+      icon: '🥫',
+      color: 'from-blue-500 to-cyan-500',
+      questionCount: 10,
+      estimatedTime: 20,
+      requiredMaterial: 'tabung',
+      difficulty: 'Sedang'
+    },
+    {
+      id: 'bola',
+      title: 'Evaluasi Bola',
+      subtitle: 'Bangun Ruang Sisi Lengkung',
+      description: 'Uji pemahaman kamu tentang sifat, unsur, luas permukaan, dan volume bola.',
+      icon: '⚽',
+      color: 'from-green-500 to-emerald-500',
+      questionCount: 10,
+      estimatedTime: 20,
+      requiredMaterial: 'bola',
+      difficulty: 'Sedang'
+    },
+    {
+      id: 'kerucut',
+      title: 'Evaluasi Kerucut',
+      subtitle: 'Bangun Ruang Sisi Lengkung',
+      description: 'Uji pemahaman kamu tentang sifat, unsur, luas permukaan, dan volume kerucut.',
+      icon: '🍦',
+      color: 'from-orange-500 to-red-500',
+      questionCount: 10,
+      estimatedTime: 20,
+      requiredMaterial: 'kerucut',
+      difficulty: 'Sedang'
+    },
+    {
+      id: 'sumatif',
+      title: 'Evaluasi Akhir',
+      subtitle: 'Evaluasi Sumatif Komprehensif',
+      description: 'Evaluasi menyeluruh semua materi bangun ruang sisi lengkung yang telah dipelajari.',
+      icon: '🏆',
+      color: 'from-purple-500 to-pink-500',
+      questionCount: 20,
+      estimatedTime: 40,
+      requiredMaterial: 'all', // Requires all materials completed
+      difficulty: 'Sulit'
+    }
+  ];
+
+  const getDifficultyColor = (difficulty) => {
+    switch(difficulty) {
+      case 'Mudah': return 'bg-green-500';
+      case 'Sedang': return 'bg-yellow-500';
+      case 'Sulit': return 'bg-red-500';
+      default: return 'bg-gray-500';
+    }
+  };
+
+  const isEvaluationUnlocked = (evaluasi) => {
+    if (evaluasi.requiredMaterial === 'all') {
+      // Final evaluation requires all individual materials completed
+      return completedMaterials.has('tabung') && completedMaterials.has('bola') && completedMaterials.has('kerucut');
+    }
+    return completedMaterials.has(evaluasi.requiredMaterial);
+  };
+
+  const getCompletionPercentage = () => {
+    const totalEvaluations = evaluasiList.length;
+    return Math.round((completedEvaluations.size / totalEvaluations) * 100);
+  };
+
+  const handleLockedClick = (evaluasiName, requirement) => {
+    let message;
+    if (requirement === 'all') {
+      message = "Selesaikan semua materi pembelajaran (Tabung, Bola, dan Kerucut) untuk membuka evaluasi akhir.";
+    } else {
+      message = `Selesaikan materi ${requirement} terlebih dahulu untuk membuka evaluasi ini.`;
+    }
+    alert(`🔒 ${evaluasiName} Terkunci\n\n${message}`);
+  };
+
+  const EvaluasiCard = ({ evaluasi }) => {
+    const isCompleted = completedEvaluations.has(evaluasi.id);
+    const isUnlocked = isEvaluationUnlocked(evaluasi);
+    const progress = progressData[evaluasi.id] || 0;
+
+    return (
+      <div className="bg-white rounded-2xl p-6 shadow-sm mb-6 transition-all duration-200 hover:shadow-lg">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-start space-x-4">
+            <div className={`w-16 h-16 bg-gradient-to-br ${evaluasi.color} rounded-2xl flex items-center justify-center text-3xl ${!isUnlocked ? 'opacity-50' : ''}`}>
+              {evaluasi.icon}
+            </div>
+            <div className="flex-1">
+              <div className="flex items-center space-x-2 mb-2">
+                <h3 className={`text-xl font-bold ${isUnlocked ? 'text-gray-800' : 'text-gray-400'}`}>
+                  {evaluasi.title}
+                </h3>
+                {isCompleted && (
+                  <div className="w-7 h-7 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm">✓</span>
+                  </div>
+                )}
+                {!isUnlocked && (
+                  <div className="w-7 h-7 bg-gray-300 rounded-full flex items-center justify-center">
+                    <span className="text-gray-500 text-sm">🔒</span>
+                  </div>
+                )}
               </div>
-              <div>
-                <p className="font-semibold text-orange-800 mb-2">💡 Petunjuk:</p>
-                <p className="text-orange-800 text-sm sm:text-base leading-relaxed">{hint}</p>
+              <p className={`text-sm mb-2 ${isUnlocked ? 'text-gray-500' : 'text-gray-400'}`}>
+                {evaluasi.subtitle}
+              </p>
+              <div className="flex items-center space-x-3 mb-3">
+                <span className={`${getDifficultyColor(evaluasi.difficulty)} text-white text-xs px-3 py-1 rounded-full font-medium ${!isUnlocked ? 'opacity-50' : ''}`}>
+                  {evaluasi.difficulty}
+                </span>
+                {isCompleted && (
+                  <span className="text-green-600 text-sm font-medium">
+                    ✅ Selesai
+                  </span>
+                )}
+                {!isCompleted && progress > 0 && isUnlocked && (
+                  <span className="text-blue-600 text-sm font-medium">
+                    {progress}% Progress
+                  </span>
+                )}
+                {!isUnlocked && (
+                  <span className="text-gray-400 text-sm">
+                    Terkunci
+                  </span>
+                )}
               </div>
             </div>
           </div>
         </div>
-      )}
-    </div>
-  );
-};
 
-// Main Evaluation Page Component
-export default function EvaluationPage() {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
-  const [showHint, setShowHint] = useState(false);
-  const [showResult, setShowResult] = useState(false);
-  const [isCorrect, setIsCorrect] = useState(null);
-  const [completedQuestions, setCompletedQuestions] = useState(0);
+        <div className={`rounded-xl p-4 mb-4 ${isUnlocked ? 'bg-gray-50' : 'bg-gray-100'}`}>
+          <p className={`text-sm leading-relaxed ${isUnlocked ? 'text-gray-700' : 'text-gray-500'}`}>
+            {evaluasi.description}
+          </p>
+          <div className="flex items-center justify-between mt-3 text-sm">
+            <div className="flex items-center space-x-4">
+              <span className={`${isUnlocked ? 'text-gray-600' : 'text-gray-400'}`}>
+                📝 {evaluasi.questionCount} Soal
+              </span>
+              <span className={`${isUnlocked ? 'text-gray-600' : 'text-gray-400'}`}>
+                ⏱ {evaluasi.estimatedTime} menit
+              </span>
+            </div>
+          </div>
+        </div>
 
-  const questions = [
-    {
-      id: 1,
-      title: "🐑 Tempat Minum Domba",
-      description: "Tempat minum domba di sebuah peternakan di Amerika Serikat didesain sehingga memiliki bentuk seperti tabung yang dipotong seperti gambar. Diameter tabung tersebut adalah 40 cm sedangkan panjangnya 5 meter.",
-      question: "Tentukan volume air yang dapat ditampung oleh satu tempat minum ini!",
-      answerLabel: "Volume =",
-      unit: "cm³",
-      correctAnswer: 628000,
-      tolerance: 10000,
-      hint: "Ingat bahwa tabung memiliki alas berbentuk lingkaran. Pikirkan rumus luas lingkaran terlebih dahulu, lalu kalikan dengan tinggi tabung. Jangan lupa mengkonversi satuan panjang ke cm!",
-      explanation: "Volume tabung = π × r² × t. Dengan diameter 40 cm (r = 20 cm) dan panjang 5 m (500 cm), maka volume = π × 20² × 500 = 628.318 cm³",
-      imageCaption: "Gambar 2.83 Ilustrasi Tempat Minum di Peternakan"
-    },
-    {
-      id: 2,
-      title: "🏗️ Menara Air",
-      description: "Sebuah menara air dengan penutup berbentuk kerucut. Tinggi menara tanpa tutup adalah 6 meter dengan jari-jari 2 m. Tinggi penutup menara air adalah 1 m. Bagian bawah menara yang berbentuk setengah bola memiliki tinggi 2 m.",
-      question: "Jika menara tersebut akan dicat seluruh permukaannya termasuk alas dan penutupnya tentukan luas permukaan menara air tersebut!",
-      answerLabel: "Luas Permukaan =",
-      unit: "m²",
-      correctAnswer: 87.96,
-      tolerance: 10,
-      hint: "Menara terdiri dari tiga bagian: tabung, kerucut (penutup), dan setengah bola (bawah). Hitung luas permukaan masing-masing bagian lalu jumlahkan. Ingat rumus luas permukaan untuk setiap bangun!",
-      explanation: "Luas permukaan = Luas tabung + Luas kerucut + Luas setengah bola. LP tabung = 2πrt = 2π(2)(6) = 75.4 m². LP kerucut = πrs, dengan s = √(r²+t²) = √(4+1) = √5. LP kerucut = π(2)(√5) = 14.1 m². LP setengah bola = 2πr² = 2π(4) = 25.1 m². Total ≈ 87.96 m²",
-      imageCaption: "Ilustrasi Menara Air dengan Berbagai Komponen"
-    },
-    {
-      id: 3,
-      title: "📐 Perbandingan Volume Bola dan Kubus",
-      type: "interactive",
-      description: "Sebuah bola diletakkan dalam sebuah kubus sehingga seluruh sisi kubus menempel pada bola. Tentukan perbandingan antara volume bola dan volume kubus tersebut.",
-      question: "Analisis perbandingan volume antara bola dan kubus yang mengelilinginya!",
-      correctAnswer: 52.36,
-      tolerance: 10,
-      hint: "Jika bola diletakkan dalam kubus dan menyentuh semua sisi, maka diameter bola sama dengan sisi kubus. Gunakan rumus volume masing-masing bangun untuk mencari perbandingannya!",
-      explanation: "Volume bola = (4/3)πr³, Volume kubus = s³. Jika bola menyentuh semua sisi kubus, maka diameter bola = sisi kubus (2r = s). Perbandingan volume = (4/3)πr³ : (2r)³ = (4/3)πr³ : 8r³ = π/6 ≈ 0.5236 atau 52.36%",
-      imageCaption: "Visualisasi Bola dalam Kubus"
-    },
-    {
-      id: 4,
-      title: "🏛️ Miniatur Tugu Sekolah",
-      description: "Dani akan membuat karya seni berupa miniatur tugu sekolah dari karton yang akan dilapisi kertas warna. Bentuk tugu terdiri dari: Kubus alas dengan panjang sisi 20 cm. Tabung dengan jari-jari 10 cm dan tinggi 25 cm. Kerucut sebagai atap dengan tinggi 12 cm.",
-      question: "Hitung jumlah kertas minimal yang diperlukan untuk melapisi seluruh permukaan bangun (luas permukaan), kecuali bagian bawah kubus!",
-      answerLabel: "Luas Permukaan =",
-      unit: "cm²",
-      correctAnswer: 4061,
-      tolerance: 100,
-      hint: "Tugu terdiri dari kubus (tanpa alas bawah), tabung (tanpa alas atas), dan kerucut. Hitung luas permukaan setiap bagian yang akan dilapisi kertas, lalu jumlahkan semuanya!",
-      explanation: "LP = LP kubus (tanpa alas) + LP tabung (tanpa alas atas) + LP kerucut. LP kubus = 5 × 20² = 2000 cm². LP tabung = 2πrt = 2π(10)(25) = 1571 cm². LP kerucut = πrs, dengan s = √(10²+12²) = √244 ≈ 15.62. LP kerucut = π(10)(15.62) = 490 cm². Total ≈ 4061 cm²",
-      imageCaption: "Desain Miniatur Tugu Sekolah"
-    },
-    {
-      id: 5,
-      title: "🎂 Nasi Tumpeng Gilang",
-      description: "Untuk memperingati ulang tahun Gilang, ibunya membuat nasi tumpeng yang disusun sedemikian rupa sehingga nasinya berbentuk kerucut dengan diameter 20 cm. Tinggi nasi dengan bentuk kerucut ini sekitar 35 cm.",
-      question: "Jika nasi kerucut ini ingin ditutupi dengan daun pisang, berapa luas daun pisang yang akan dibutuhkan?",
-      answerLabel: "Luas Permukaan =",
-      unit: "cm²",
-      correctAnswer: 1256,
-      tolerance: 50,
-      hint: "Untuk menutupi kerucut dengan daun pisang, kita perlu menghitung luas permukaan kerucut. Ingat bahwa kerucut terdiri dari alas lingkaran dan selimut kerucut. Pikirkan apa saja yang perlu ditutupi!",
-      explanation: "Luas permukaan kerucut = luas alas + luas selimut = πr² + πrs. Dengan r = 10 cm, s = √(r² + t²) = √(10² + 35²) = √1325 ≈ 36.4 cm. Maka luas = π(10)² + π(10)(36.4) ≈ 314 + 1144 = 1256 cm²",
-      imageCaption: "🎉 Visualisasi Nasi Tumpeng Berbentuk Kerucut"
-    }
-  ];
-
-  const currentQuestion = questions[currentQuestionIndex];
-
-  const handleSubmit = () => {
-    if (currentQuestion.type === 'interactive') return; // Handle by SphereCubeInteractive
-    
-    const answer = parseFloat(userAnswer);
-    const correct = Math.abs(answer - currentQuestion.correctAnswer) <= currentQuestion.tolerance;
-    
-    setIsCorrect(correct);
-    setShowResult(true);
-    
-    if (correct && completedQuestions === currentQuestionIndex) {
-      setCompletedQuestions(completedQuestions + 1);
-    }
-  };
-
-  const handleInteractiveComplete = (userAnswer, isCorrect) => {
-    setIsCorrect(isCorrect);
-    setShowResult(true);
-    
-    if (isCorrect && completedQuestions === currentQuestionIndex) {
-      setCompletedQuestions(completedQuestions + 1);
-    }
-  };
-
-  const handleNext = () => {
-    if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setUserAnswer('');
-      setShowResult(false);
-      setIsCorrect(null);
-      setShowHint(false);
-    } else {
-      alert('🎉 Selamat! Anda telah menyelesaikan semua soal evaluasi dengan baik!');
-    }
+        <div className="flex items-center justify-between">
+          {isUnlocked ? (
+            <Link href={`/evaluasi/${evaluasi.id}`}>
+              <button className={`px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
+                isCompleted 
+                  ? 'bg-green-100 text-green-700 hover:bg-green-200' 
+                  : 'bg-gradient-to-r ' + evaluasi.color + ' text-white hover:shadow-lg transform hover:scale-105'
+              }`}>
+                {isCompleted ? '📊 Lihat Hasil' : progress > 0 ? '📝 Lanjutkan' : '🚀 Mulai Evaluasi'}
+              </button>
+            </Link>
+          ) : (
+            <button 
+              onClick={() => handleLockedClick(evaluasi.title, evaluasi.requiredMaterial)}
+              className="px-6 py-3 bg-gray-200 text-gray-500 rounded-xl font-medium cursor-not-allowed"
+            >
+              🔒 Terkunci
+            </button>
+          )}
+          
+          {isCompleted && (
+            <div className="flex items-center space-x-2 text-green-600 text-sm">
+              <span>⭐</span>
+              <span>Excellent!</span>
+            </div>
+          )}
+        </div>
+      </div>
+    );
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-cyan-50">
-      <div className="max-w-4xl mx-auto bg-white shadow-2xl rounded-lg overflow-hidden">
-        <EvaluationHeader 
-          progress={completedQuestions}
-          totalQuestions={questions.length}
-        />
-        
-        <ProgressBar 
-          current={completedQuestions}
-          total={questions.length}
-        />
-        
-        <div className="pb-4">
-          {currentQuestion.type === 'interactive' ? (
-            <SphereCubeInteractive
-              onComplete={handleInteractiveComplete}
-              showResult={showResult}
-              isCorrect={isCorrect}
-              question={currentQuestion}
-            />
-          ) : (
-            <QuestionCard
-              question={currentQuestion}
-              userAnswer={userAnswer}
-              onAnswerChange={setUserAnswer}
-              showResult={showResult}
-              isCorrect={isCorrect}
-            />
-          )}
-          
-          <HintCard
-            hint={currentQuestion.hint}
-            isVisible={showHint}
-            onToggle={() => setShowHint(!showHint)}
-          />
+    <div className="min-h-screen bg-gray-50 font-sans">
+      {/* Header */}
+      <div className="bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 px-6 py-8 text-white">
+        <div className="flex items-center justify-between mb-6">
+          <Link href="/">
+            <button className="flex items-center space-x-2 text-white hover:text-purple-200 transition-colors">
+              <span className="text-lg">←</span>
+              <span>Kembali</span>
+            </button>
+          </Link>
+          <div className="bg-white/20 px-4 py-2 rounded-full text-sm font-medium">
+            {getCompletionPercentage()}% Selesai
+          </div>
         </div>
         
-        <ActionButtons
-          onSubmit={handleSubmit}
-          onNext={handleNext}
-          showResult={showResult}
-          isLastQuestion={currentQuestionIndex === questions.length - 1}
-          hasAnswer={userAnswer.trim() !== '' || currentQuestion.type === 'interactive'}
-        />
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-2">📊 Evaluasi Pembelajaran</h1>
+          <p className="text-purple-100">Uji pemahaman kamu tentang bangun ruang sisi lengkung</p>
+        </div>
+
+        {/* Overall Progress */}
+        <div className="mt-6 bg-white/10 rounded-2xl p-4">
+          <h2 className="font-bold mb-3">Progress Evaluasi</h2>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-sm">📝 {completedEvaluations.size}/{evaluasiList.length} Evaluasi</span>
+          </div>
+          <div className="w-full bg-white/20 rounded-full h-3 mb-2">
+            <div 
+              className="bg-white h-3 rounded-full transition-all duration-300" 
+              style={{ width: `${getCompletionPercentage()}%` }}
+            ></div>
+          </div>
+          <p className="text-purple-100 text-sm">
+            Kamu telah menyelesaikan {getCompletionPercentage()}% dari seluruh evaluasi
+          </p>
+        </div>
+      </div>
+
+      <div className="px-6 py-6">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            🎯 Pilih Evaluasi
+          </h2>
+          
+          {evaluasiList.map((evaluasi) => (
+            <EvaluasiCard key={evaluasi.id} evaluasi={evaluasi} />
+          ))}
+
+          {/* Achievement Section */}
+          {completedEvaluations.size > 0 && (
+            <div className="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
+              <div className="text-center">
+                <div className="text-4xl mb-3">🏆</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">Pencapaian Kamu</h3>
+                <p className="text-gray-600 mb-4">
+                  Selamat! Kamu telah menyelesaikan {completedEvaluations.size} evaluasi.
+                </p>
+                <div className="flex justify-center space-x-2">
+                  {[...completedEvaluations].map(evalId => {
+                    const evaluasi = evaluasiList.find(e => e.id === evalId);
+                    return evaluasi ? (
+                      <div key={evalId} className="text-2xl" title={evaluasi.title}>
+                        {evaluasi.icon}
+                      </div>
+                    ) : null;
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
