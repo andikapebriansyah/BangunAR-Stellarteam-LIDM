@@ -10,8 +10,8 @@ export default function MateriHeader({ materiData, completedTopics }) {
             <span className="text-sm sm:text-base">Kembali</span>
           </button>
         </Link>
-        <div className="bg-white bg-opacity-20 px-3 sm:px-4 py-1 sm:py-2 rounded-full text-xs sm:text-sm backdrop-blur-sm">
-          {materiData.sections.length} Modul Interaktif
+        <div className="bg-white text-blue-400 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
+          Modul Interaktif
         </div>
       </div>
       
