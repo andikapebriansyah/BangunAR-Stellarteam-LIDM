@@ -8,6 +8,7 @@ export default function MateriPembelajaran() {
 
   // Load progress from localStorage
   useEffect(() => {
+    // Load general completed topics
     const completed = localStorage.getItem('completedTopics');
     if (completed) {
       setCompletedTopics(new Set(JSON.parse(completed)));
@@ -17,6 +18,55 @@ export default function MateriPembelajaran() {
     if (progress) {
       setProgressData(JSON.parse(progress));
     }
+
+    // Check specific material completion
+    const updatedCompleted = new Set();
+    
+    // Check tabung completion
+    const tabungProgress = localStorage.getItem('tabungProgress');
+    if (tabungProgress) {
+      const tabungData = JSON.parse(tabungProgress);
+      if (tabungData.completed) {
+        updatedCompleted.add('tabung');
+      }
+    }
+    
+    // Check pengantar completion (if it exists)
+    const pengantarCompleted = localStorage.getItem('section-completed-pengantar');
+    if (pengantarCompleted === 'true') {
+      updatedCompleted.add('pengantar');
+    }
+
+    // Update completedTopics with the correct data
+    if (updatedCompleted.size > 0) {
+      setCompletedTopics(prev => {
+        const newCompleted = new Set([...prev, ...updatedCompleted]);
+        // Also save the updated completion status
+        localStorage.setItem('completedTopics', JSON.stringify([...newCompleted]));
+        return newCompleted;
+      });
+    }
+  }, []);
+
+  // Add a window focus listener to refresh completion status
+  useEffect(() => {
+    const handleFocus = () => {
+      // Refresh completion status when user comes back to this page
+      const tabungProgress = localStorage.getItem('tabungProgress');
+      if (tabungProgress) {
+        const tabungData = JSON.parse(tabungProgress);
+        if (tabungData.completed) {
+          setCompletedTopics(prev => {
+            const newCompleted = new Set([...prev, 'tabung']);
+            localStorage.setItem('completedTopics', JSON.stringify([...newCompleted]));
+            return newCompleted;
+          });
+        }
+      }
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, []);
 
   const materiList = [
@@ -109,7 +159,34 @@ export default function MateriPembelajaran() {
   const MateriCard = ({ materi }) => {
     const isCompleted = completedTopics.has(materi.id);
     const isAvailable = materi.status === 'available' || isCompleted;
-    const progress = progressData[materi.id] || 0;
+    
+    // Calculate progress for specific materials
+    let progress = progressData[materi.id] || 0;
+    
+    // For tabung, calculate progress based on completed sections
+    if (materi.id === 'tabung') {
+      const tabungProgress = localStorage.getItem('tabungProgress');
+      if (tabungProgress) {
+        const tabungData = JSON.parse(tabungProgress);
+        if (tabungData.completed) {
+          progress = 100;
+        } else if (tabungData.completedSections) {
+          progress = Math.round((tabungData.completedSections.length / materi.topicCount) * 100);
+        }
+      }
+      
+      // Also check individual section completions
+      const savedCompleted = localStorage.getItem('completedTopics');
+      if (savedCompleted) {
+        const completedArray = JSON.parse(savedCompleted);
+        const tabungSections = completedArray.filter(section => 
+          section.includes('tabung-') || ['case-study', 'exploration', 'experiment', 'investigation', 'application'].includes(section)
+        );
+        if (tabungSections.length > 0) {
+          progress = Math.max(progress, Math.round((tabungSections.length / materi.topicCount) * 100));
+        }
+      }
+    }
 
     return (
       <div className="bg-white rounded-2xl p-4 shadow-sm mb-4">
@@ -186,7 +263,7 @@ export default function MateriPembelajaran() {
               <span>Kembali</span>
             </button>
           </Link>
-          <div className="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+          <div className="bg-white text-blue-400 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
             {getCompletionPercentage()}% Selesai
           </div>
         </div>

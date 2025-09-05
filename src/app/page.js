@@ -8,6 +8,7 @@ export default function Home() {
   const [completedChallenges, setCompletedChallenges] = useState(0);
   const [completedMaterials, setCompletedMaterials] = useState(0);
   const [diagnosticCompleted, setDiagnosticCompleted] = useState(false);
+  const [tabungCompleted, setTabungCompleted] = useState(false);
   const [showARSelector, setShowARSelector] = useState(false);
 
   // Load progress from localStorage
@@ -26,9 +27,21 @@ export default function Home() {
 
     const diagnostic = localStorage.getItem('diagnosticTest');
     if (diagnostic) {
-      setDiagnosticCompleted(true);
+      const diagnosticData = JSON.parse(diagnostic);
+      setDiagnosticCompleted(diagnosticData.completed === true);
+    }
+
+    // Check if tabung material is completed (all 5 sections)
+    const tabungProgress = localStorage.getItem('tabungProgress');
+    if (tabungProgress) {
+      const progress = JSON.parse(tabungProgress);
+      setTabungCompleted(progress.completed === true);
     }
   }, []);
+
+  // Derived state - check if tabung material has been completed (not just any material)
+  // Build Challenge and Evaluasi require tabung completion specifically
+  const hasCompletedTabung = tabungCompleted;
 
   const clearAllData = () => {
     if (confirm('Apakah Anda yakin ingin menghapus semua data progress?')) {
@@ -39,14 +52,29 @@ export default function Home() {
       localStorage.removeItem('challengeScores');
       localStorage.removeItem('lastBuildResult');
       localStorage.removeItem('diagnosticTest');
+      localStorage.removeItem('diagnosticProgress');
+      localStorage.removeItem('tabungProgress');
+      
+      // Clear all LKPD and AR completion states
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('ar-completed-') || key.startsWith('lkpd-completed-')) {
+          localStorage.removeItem(key);
+        }
+      });
       
       // Reset state
       setCompletedChallenges(0);
       setCompletedMaterials(0);
       setDiagnosticCompleted(false);
+      setTabungCompleted(false);
       
       alert('Semua data telah dihapus!');
     }
+  };
+
+  // Function to handle locked menu clicks
+  const handleLockedClick = (menuName, requirement) => {
+    alert(`🔒 ${menuName} Terkunci\n\n${requirement}`);
   };
 
   return (
@@ -65,16 +93,29 @@ export default function Home() {
           </div>
           
           {/* AR Button - Fixed with better visibility */}
-          <button 
-            onClick={() => setShowARSelector(true)}
-            className="bg-white bg-opacity-20 border-2 border-white px-3 py-2 rounded-xl hover:bg-opacity-30 transition-all"
-            title="Quick AR Access"
-          >
-            <div className="text-center text-white">
-              <div className="text-lg">🥽</div>
-              <div className="text-xs font-medium">AR</div>
-            </div>
-          </button>
+          {tabungCompleted ? (
+            <button 
+              onClick={() => setShowARSelector(true)}
+              className="bg-white bg-opacity-20 border-2 border-white px-3 py-2 rounded-xl hover:bg-opacity-30 transition-all"
+              title="Quick AR Access"
+            >
+              <div className="text-center text-white">
+                <div className="text-lg">🥽</div>
+                <div className="text-xs font-medium">AR</div>
+              </div>
+            </button>
+          ) : (
+            <button 
+              onClick={() => handleLockedClick("Menu AR", "Selesaikan materi tabung terlebih dahulu untuk membuka menu AR.")}
+              className="bg-white bg-opacity-10 border-2 border-white border-opacity-50 px-3 py-2 rounded-xl cursor-not-allowed opacity-60"
+              title="AR Terkunci - Selesaikan materi tabung"
+            >
+              <div className="text-center text-white text-opacity-60">
+                <div className="text-lg">🥽</div>
+                <div className="text-xs font-medium">AR 🔒</div>
+              </div>
+            </button>
+          )}
         </div>
         
         <div className="mt-6">
@@ -104,7 +145,7 @@ export default function Home() {
         </div>
 
         {/* Tes Diagnostik - Fixed button visibility */}
-        <Link href="/tes-diagnostik">
+        <Link href="/diagnostik-tes">
           <div className="bg-gradient-to-br from-indigo-500 via-purple-600 to-blue-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
             <div className="text-center">
               <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
@@ -128,8 +169,28 @@ export default function Home() {
         {/* Materi dan Build Challenge - Grid 2 kolom */}
         <div className="grid grid-cols-2 gap-4">
           {/* Materi Pembelajaran */}
-          <Link href="/materi-pembelajaran">
-            <div className={`bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full ${!diagnosticCompleted ? 'opacity-60 pointer-events-none' : ''}`}>
+          {diagnosticCompleted ? (
+            <Link href="/materi-pembelajaran">
+              <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full">
+                <div className="w-12 h-12 bg-red-400 rounded-2xl mb-3 flex items-center justify-center">
+                  <span className="text-white text-lg">📖</span>
+                </div>
+                <h3 className="font-bold text-gray-800 mb-2">Materi Pembelajaran</h3>
+                <p className="text-gray-500 text-xs mb-3 leading-relaxed">
+                  Pelajari bangun ruang dengan visualisasi 3D
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-medium text-red-500">
+                    Mulai Belajar →
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div 
+              className="bg-white rounded-2xl p-4 shadow-sm cursor-not-allowed h-full opacity-60"
+              onClick={() => handleLockedClick("Materi Pembelajaran", "Selesaikan tes diagnostik terlebih dahulu untuk membuka materi pembelajaran.")}
+            >
               <div className="w-12 h-12 bg-red-400 rounded-2xl mb-3 flex items-center justify-center">
                 <span className="text-white text-lg">📖</span>
               </div>
@@ -138,17 +199,37 @@ export default function Home() {
                 Pelajari bangun ruang dengan visualisasi 3D
               </p>
               <div className="flex items-center justify-between">
-                <div className={`text-xs font-medium ${!diagnosticCompleted ? 'text-gray-400' : 'text-red-500'}`}>
-                  {!diagnosticCompleted ? 'Selesaikan tes dulu' : 'Mulai Belajar →'}
+                <div className="text-xs font-medium text-gray-400">
+                  Selesaikan tes dulu
                 </div>
-                {!diagnosticCompleted && <span className="text-gray-400 text-xs">🔒</span>}
+                <span className="text-gray-400 text-xs">🔒</span>
               </div>
             </div>
-          </Link>
+          )}
 
           {/* Build Challenge */}
-          <Link href="/build-challenge-selection">
-            <div className={`bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full ${!diagnosticCompleted ? 'opacity-60 pointer-events-none' : ''}`}>
+          {hasCompletedTabung ? (
+            <Link href="/build-challenge-selection">
+              <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full">
+                <div className="w-12 h-12 bg-teal-400 rounded-2xl mb-3 flex items-center justify-center">
+                  <span className="text-white text-lg">🎮</span>
+                </div>
+                <h3 className="font-bold text-gray-800 mb-2">Build Challenge</h3>
+                <p className="text-gray-500 text-xs mb-3 leading-relaxed">
+                  Game edukatif drag & drop bangun ruang
+                </p>
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-medium text-teal-500">
+                    Mulai Build →
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <div 
+              className="bg-white rounded-2xl p-4 shadow-sm cursor-not-allowed h-full opacity-60"
+              onClick={() => handleLockedClick("Build Challenge", "Selesaikan materi tabung terlebih dahulu untuk membuka build challenge.")}
+            >
               <div className="w-12 h-12 bg-teal-400 rounded-2xl mb-3 flex items-center justify-center">
                 <span className="text-white text-lg">🎮</span>
               </div>
@@ -157,33 +238,54 @@ export default function Home() {
                 Game edukatif drag & drop bangun ruang
               </p>
               <div className="flex items-center justify-between">
-                <div className={`text-xs font-medium ${!diagnosticCompleted ? 'text-gray-400' : 'text-teal-500'}`}>
-                  {!diagnosticCompleted ? 'Selesaikan tes dulu' : 'Mulai Build →'}
+                <div className="text-xs font-medium text-gray-400">
+                  Selesaikan tabung dulu
                 </div>
-                {!diagnosticCompleted && <span className="text-gray-400 text-xs">🔒</span>}
+                <span className="text-gray-400 text-xs">🔒</span>
               </div>
             </div>
-          </Link>
+          )}
         </div>
 
         {/* Evaluasi Card - Fixed button visibility */}
-        <Link href="/evaluasi">
-          <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+        {hasCompletedTabung ? (
+          <Link href="/evaluasi">
+            <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                  <span className="text-white text-2xl">📊</span>
+                </div>
+                <h3 className="text-xl font-bold mb-2">Evaluasi</h3>
+                <p className="text-orange-100 text-sm mb-4 leading-relaxed">
+                  Lihat progress pembelajaran dan hasil evaluasi untuk memahami perkembangan Anda
+                </p>
+                {/* Fixed button with better contrast */}
+                <div className="bg-white text-orange-600 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
+                  Mulai Evaluasi →
+                </div>
+              </div>
+            </div>
+          </Link>
+        ) : (
+          <div 
+            className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 rounded-2xl p-6 text-white cursor-not-allowed opacity-60"
+            onClick={() => handleLockedClick("Evaluasi", "Selesaikan materi tabung terlebih dahulu untuk membuka evaluasi.")}
+          >
             <div className="text-center">
               <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
                 <span className="text-white text-2xl">📊</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">Evaluasi</h3>
+              <h3 className="text-xl font-bold mb-2">Evaluasi 🔒</h3>
               <p className="text-orange-100 text-sm mb-4 leading-relaxed">
                 Lihat progress pembelajaran dan hasil evaluasi untuk memahami perkembangan Anda
               </p>
-              {/* Fixed button with better contrast */}
-              <div className="bg-white text-orange-600 px-6 py-3 rounded-full text-sm font-medium hover:bg-gray-100 transition-all">
-                Mulai Evaluasi →
+              {/* Locked button */}
+              <div className="bg-white bg-opacity-50 text-orange-200 px-6 py-3 rounded-full text-sm font-medium">
+                Selesaikan tabung dulu
               </div>
             </div>
           </div>
-        </Link>
+        )}
 
         {/* Gabung Kelas */}
         <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
@@ -211,10 +313,12 @@ export default function Home() {
       </div>
 
       {/* AR Shape Selector Modal */}
-      <ARShapeSelector 
-        isOpen={showARSelector} 
-        onClose={() => setShowARSelector(false)} 
-      />
+      {tabungCompleted && (
+        <ARShapeSelector 
+          isOpen={showARSelector} 
+          onClose={() => setShowARSelector(false)} 
+        />
+      )}
     </div>
   );
 }

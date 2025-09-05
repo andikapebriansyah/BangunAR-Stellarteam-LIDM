@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { CheckCircle, XCircle, BarChart3, BookOpen, ArrowRight, ArrowLeft, Lightbulb } from 'lucide-react';
 
 // Header Component
@@ -208,6 +208,90 @@ const ActionButtons = ({ onSubmit, onNext, onPrev, showResult, isLastQuestion, h
   );
 };
 
+// Questions data
+const DIAGNOSTIC_QUESTIONS = [
+  {
+    id: 1,
+    question: "Bangun datar yang memiliki 4 sisi sama panjang dan 4 sudut siku-siku adalah …",
+    options: ["Persegi", "Persegi panjang", "Segitiga", "Trapesium"],
+    correctAnswer: "A",
+    explanation: "Persegi adalah bangun datar yang memiliki 4 sisi sama panjang dan 4 sudut siku-siku (90°)."
+  },
+  {
+    id: 2,
+    question: "Bangun datar yang memiliki 3 sisi dan 3 sudut adalah …",
+    options: ["Persegi", "Segitiga", "Lingkaran", "Jajar genjang"],
+    correctAnswer: "B",
+    explanation: "Segitiga adalah bangun datar yang memiliki 3 sisi dan 3 sudut."
+  },
+  {
+    id: 3,
+    question: "Luas persegi dengan panjang sisi 6 cm adalah …",
+    options: ["12 cm²", "18 cm²", "36 cm²", "72 cm²"],
+    correctAnswer: "C",
+    explanation: "Luas persegi = sisi × sisi = 6 × 6 = 36 cm²"
+  },
+  {
+    id: 4,
+    question: "Bangun ruang yang memiliki 6 sisi berbentuk persegi adalah …",
+    options: ["Balok", "Kubus", "Prisma segitiga", "Limas segiempat"],
+    correctAnswer: "B",
+    explanation: "Kubus adalah bangun ruang yang memiliki 6 sisi berbentuk persegi yang sama besar."
+  },
+  {
+    id: 5,
+    question: "Sebuah balok memiliki panjang 8 cm, lebar 5 cm, dan tinggi 3 cm. Volumenya adalah …",
+    options: ["16 cm³", "40 cm³", "120 cm³", "144 cm³"],
+    correctAnswer: "C",
+    explanation: "Volume balok = panjang × lebar × tinggi = 8 × 5 × 3 = 120 cm³"
+  },
+  {
+    id: 6,
+    question: "Bangun ruang yang memiliki alas berbentuk persegi panjang dan 4 sisi tegak berbentuk persegi panjang adalah …",
+    options: ["Balok", "Kubus", "Limas segiempat", "Prisma segitiga"],
+    correctAnswer: "A",
+    explanation: "Balok adalah bangun ruang yang memiliki alas dan tutup berbentuk persegi panjang serta 4 sisi tegak berbentuk persegi panjang."
+  },
+  {
+    id: 7,
+    question: "Bangun datar yang tidak memiliki sudut adalah …",
+    options: ["Lingkaran", "Persegi", "Segitiga", "Jajar genjang"],
+    correctAnswer: "A",
+    explanation: "Lingkaran adalah bangun datar yang tidak memiliki sudut karena bentuknya melengkung."
+  },
+  {
+    id: 8,
+    question: "Jika sebuah kubus memiliki panjang sisi 4 cm, luas permukaannya adalah …",
+    options: ["16 cm²", "24 cm²", "64 cm²", "96 cm²"],
+    correctAnswer: "D",
+    explanation: "Luas permukaan kubus = 6 × sisi² = 6 × 4² = 6 × 16 = 96 cm²"
+  },
+  {
+    id: 9,
+    question: "Limas segiempat memiliki …",
+    options: [
+      "1 alas segiempat dan 4 sisi tegak berbentuk segitiga",
+      "2 alas segiempat dan 4 sisi tegak berbentuk persegi panjang",
+      "1 alas segiempat dan 4 sisi tegak berbentuk persegi",
+      "1 alas segitiga dan 3 sisi tegak berbentuk segitiga"
+    ],
+    correctAnswer: "A",
+    explanation: "Limas segiempat memiliki 1 alas berbentuk segiempat dan 4 sisi tegak berbentuk segitiga yang bertemu di satu titik puncak."
+  },
+  {
+    id: 10,
+    question: "Prisma segitiga memiliki …",
+    options: [
+      "2 alas segitiga dan 3 sisi tegak berbentuk persegi panjang",
+      "1 alas segitiga dan 3 sisi tegak berbentuk persegi panjang",
+      "2 alas segitiga dan 3 sisi tegak berbentuk segitiga",
+      "2 alas persegi dan 4 sisi tegak berbentuk persegi panjang"
+    ],
+    correctAnswer: "A",
+    explanation: "Prisma segitiga memiliki 2 alas berbentuk segitiga dan 3 sisi tegak berbentuk persegi panjang."
+  }
+];
+
 // Main Diagnostic Test Page Component
 export default function DiagnosticTestPage() {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -217,89 +301,161 @@ export default function DiagnosticTestPage() {
   const [completedQuestions, setCompletedQuestions] = useState(0);
   const [userAnswers, setUserAnswers] = useState({});
   const [score, setScore] = useState(0);
+  const [showFinalResult, setShowFinalResult] = useState(false);
+  const [finalTestResult, setFinalTestResult] = useState(null);
 
-  const questions = [
-    {
-      id: 1,
-      question: "Bangun datar yang memiliki 4 sisi sama panjang dan 4 sudut siku-siku adalah …",
-      options: ["Persegi", "Persegi panjang", "Segitiga", "Trapesium"],
-      correctAnswer: "A",
-      explanation: "Persegi adalah bangun datar yang memiliki 4 sisi sama panjang dan 4 sudut siku-siku (90°)."
-    },
-    {
-      id: 2,
-      question: "Bangun datar yang memiliki 3 sisi dan 3 sudut adalah …",
-      options: ["Persegi", "Segitiga", "Lingkaran", "Jajar genjang"],
-      correctAnswer: "B",
-      explanation: "Segitiga adalah bangun datar yang memiliki 3 sisi dan 3 sudut."
-    },
-    {
-      id: 3,
-      question: "Luas persegi dengan panjang sisi 6 cm adalah …",
-      options: ["12 cm²", "18 cm²", "36 cm²", "72 cm²"],
-      correctAnswer: "C",
-      explanation: "Luas persegi = sisi × sisi = 6 × 6 = 36 cm²"
-    },
-    {
-      id: 4,
-      question: "Bangun ruang yang memiliki 6 sisi berbentuk persegi adalah …",
-      options: ["Balok", "Kubus", "Prisma segitiga", "Limas segiempat"],
-      correctAnswer: "B",
-      explanation: "Kubus adalah bangun ruang yang memiliki 6 sisi berbentuk persegi yang sama besar."
-    },
-    {
-      id: 5,
-      question: "Sebuah balok memiliki panjang 8 cm, lebar 5 cm, dan tinggi 3 cm. Volumenya adalah …",
-      options: ["16 cm³", "40 cm³", "120 cm³", "144 cm³"],
-      correctAnswer: "C",
-      explanation: "Volume balok = panjang × lebar × tinggi = 8 × 5 × 3 = 120 cm³"
-    },
-    {
-      id: 6,
-      question: "Bangun ruang yang memiliki alas berbentuk persegi panjang dan 4 sisi tegak berbentuk persegi panjang adalah …",
-      options: ["Balok", "Kubus", "Limas segiempat", "Prisma segitiga"],
-      correctAnswer: "A",
-      explanation: "Balok adalah bangun ruang yang memiliki alas dan tutup berbentuk persegi panjang serta 4 sisi tegak berbentuk persegi panjang."
-    },
-    {
-      id: 7,
-      question: "Bangun datar yang tidak memiliki sudut adalah …",
-      options: ["Lingkaran", "Persegi", "Segitiga", "Jajar genjang"],
-      correctAnswer: "A",
-      explanation: "Lingkaran adalah bangun datar yang tidak memiliki sudut karena bentuknya melengkung."
-    },
-    {
-      id: 8,
-      question: "Jika sebuah kubus memiliki panjang sisi 4 cm, luas permukaannya adalah …",
-      options: ["16 cm²", "24 cm²", "64 cm²", "96 cm²"],
-      correctAnswer: "D",
-      explanation: "Luas permukaan kubus = 6 × sisi² = 6 × 4² = 6 × 16 = 96 cm²"
-    },
-    {
-      id: 9,
-      question: "Limas segiempat memiliki …",
-      options: [
-        "1 alas segiempat dan 4 sisi tegak berbentuk segitiga",
-        "2 alas segiempat dan 4 sisi tegak berbentuk persegi panjang",
-        "1 alas segiempat dan 4 sisi tegak berbentuk persegi",
-        "1 alas segitiga dan 3 sisi tegak berbentuk segitiga"
-      ],
-      correctAnswer: "A",
-      explanation: "Limas segiempat memiliki 1 alas berbentuk segiempat dan 4 sisi tegak berbentuk segitiga yang bertemu di satu titik puncak."
-    },
-    {
-      id: 10,
-      question: "Prisma segitiga memiliki …",
-      options: [
-        "2 alas segitiga dan 3 sisi tegak berbentuk persegi panjang",
-        "1 alas segitiga dan 3 sisi tegak berbentuk persegi panjang",
-        "2 alas segitiga dan 3 sisi tegak berbentuk segitiga",
-        "2 alas persegi dan 4 sisi tegak berbentuk persegi panjang"
-      ],
-      correctAnswer: "A",
-      explanation: "Prisma segitiga memiliki 2 alas berbentuk segitiga dan 3 sisi tegak berbentuk persegi panjang."
+  const questions = DIAGNOSTIC_QUESTIONS;
+
+  // Load progress from localStorage on component mount
+  React.useEffect(() => {
+    // First check if test is already completed
+    const completedTest = localStorage.getItem('diagnosticTest');
+    if (completedTest) {
+      const testResult = JSON.parse(completedTest);
+      if (testResult.completed) {
+        setShowFinalResult(true);
+        setFinalTestResult(testResult);
+        return; // Don't load progress if test is completed
+      }
     }
-  ];
+
+    // Load progress if test is not completed
+    const savedProgress = localStorage.getItem('diagnosticProgress');
+    if (savedProgress) {
+      const progress = JSON.parse(savedProgress);
+      const questionIndex = progress.currentQuestionIndex || 0;
+      setCurrentQuestionIndex(questionIndex);
+      setUserAnswers(progress.userAnswers || {});
+      setCompletedQuestions(progress.completedQuestions || 0);
+      setScore(progress.score || 0);
+      
+      // Set initial states for the current question
+      const currentAnswer = progress.userAnswers[questionIndex];
+      if (currentAnswer) {
+        setSelectedAnswer(currentAnswer);
+        setShowResult(true);
+        setIsCorrect(currentAnswer === DIAGNOSTIC_QUESTIONS[questionIndex]?.correctAnswer);
+      }
+    }
+  }, []); // DIAGNOSTIC_QUESTIONS is static, so we don't need it in deps
+
+  // Save progress to localStorage whenever state changes
+  const saveProgress = (questionIndex, answers, completed, currentScore) => {
+    const progress = {
+      currentQuestionIndex: questionIndex,
+      userAnswers: answers,
+      completedQuestions: completed,
+      score: currentScore,
+      timestamp: Date.now()
+    };
+    localStorage.setItem('diagnosticProgress', JSON.stringify(progress));
+  };
+
+  // Final Result Component
+  const FinalResultComponent = ({ result }) => {
+    const getResultMessage = (percentage) => {
+      if (percentage >= 70) return { 
+        icon: '🎉', 
+        title: 'Excellent!', 
+        message: 'Pemahaman Anda tentang bangun ruang dan bangun datar sangat baik!',
+        color: 'text-green-600',
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-200'
+      };
+      if (percentage >= 50) return { 
+        icon: '👍', 
+        title: 'Good!', 
+        message: 'Anda memiliki pemahaman yang cukup baik, terus tingkatkan!',
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-200'
+      };
+      return { 
+        icon: '💪', 
+        title: 'Keep Learning!', 
+        message: 'Jangan menyerah! Pelajari materi lebih dalam lagi.',
+        color: 'text-orange-600',
+        bgColor: 'bg-orange-50',
+        borderColor: 'border-orange-200'
+      };
+    };
+
+    const resultInfo = getResultMessage(result.percentage);
+
+    const handleRetakeTest = () => {
+      localStorage.removeItem('diagnosticTest');
+      localStorage.removeItem('diagnosticProgress');
+      window.location.reload();
+    };
+
+    const handleGoHome = () => {
+      window.location.href = '/';
+    };
+
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <DiagnosticHeader progress={result.totalQuestions} totalQuestions={result.totalQuestions} />
+        
+        <div className="max-w-2xl mx-auto p-6">
+          <div className={`${resultInfo.bgColor} ${resultInfo.borderColor} border-2 rounded-2xl p-8 text-center`}>
+            <div className="text-6xl mb-4">{resultInfo.icon}</div>
+            <h2 className={`text-3xl font-bold ${resultInfo.color} mb-2`}>
+              {resultInfo.title}
+            </h2>
+            <p className="text-gray-700 mb-6">{resultInfo.message}</p>
+            
+            <div className="bg-white rounded-xl p-6 mb-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4">Hasil Tes Anda</h3>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="text-center">
+                  <div className={`text-3xl font-bold ${resultInfo.color}`}>
+                    {result.score}/{result.totalQuestions}
+                  </div>
+                  <div className="text-gray-600">Skor</div>
+                </div>
+                <div className="text-center">
+                  <div className={`text-3xl font-bold ${resultInfo.color}`}>
+                    {result.percentage}%
+                  </div>
+                  <div className="text-gray-600">Persentase</div>
+                </div>
+              </div>
+              
+              <div className="mt-4 text-sm text-gray-500">
+                Diselesaikan pada: {new Date(result.completedAt).toLocaleDateString('id-ID', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <button
+                onClick={handleGoHome}
+                className="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-indigo-700 transition-all duration-200"
+              >
+                🏠 Kembali ke Beranda
+              </button>
+              <button
+                onClick={handleRetakeTest}
+                className="w-full bg-gray-200 text-gray-700 py-3 px-6 rounded-xl font-medium hover:bg-gray-300 transition-all duration-200"
+              >
+                🔄 Ulangi Tes
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // If test is completed, show final result
+  if (showFinalResult && finalTestResult) {
+    return <FinalResultComponent result={finalTestResult} />;
+  }
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -308,44 +464,76 @@ export default function DiagnosticTestPage() {
     setIsCorrect(correct);
     setShowResult(true);
     
-    // Save user answer
-    setUserAnswers({
+    // Update user answers
+    const newUserAnswers = {
       ...userAnswers,
       [currentQuestionIndex]: selectedAnswer
-    });
+    };
+    setUserAnswers(newUserAnswers);
+    
+    let newScore = score;
+    let newCompletedQuestions = completedQuestions;
     
     if (correct && completedQuestions === currentQuestionIndex) {
-      setCompletedQuestions(completedQuestions + 1);
-      setScore(score + 1);
+      newCompletedQuestions = completedQuestions + 1;
+      newScore = score + 1;
+      setCompletedQuestions(newCompletedQuestions);
+      setScore(newScore);
     }
+    
+    // Save progress after updating answers
+    saveProgress(currentQuestionIndex, newUserAnswers, newCompletedQuestions, newScore);
   };
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
-      setSelectedAnswer(userAnswers[currentQuestionIndex + 1] || '');
-      setShowResult(userAnswers[currentQuestionIndex + 1] !== undefined);
-      setIsCorrect(userAnswers[currentQuestionIndex + 1] === questions[currentQuestionIndex + 1]?.correctAnswer);
+      const newQuestionIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(newQuestionIndex);
+      setSelectedAnswer(userAnswers[newQuestionIndex] || '');
+      setShowResult(userAnswers[newQuestionIndex] !== undefined);
+      setIsCorrect(userAnswers[newQuestionIndex] === questions[newQuestionIndex]?.correctAnswer);
+      
+      // Save progress with new question index
+      saveProgress(newQuestionIndex, userAnswers, completedQuestions, score);
     } else {
-      // Show final results
+      // Test completed - show final results and clear progress
       const finalScore = Object.keys(userAnswers).reduce((total, questionIndex) => {
         return total + (userAnswers[questionIndex] === questions[questionIndex].correctAnswer ? 1 : 0);
       }, 0);
+      
+      // Save final result to different localStorage key
+      localStorage.setItem('diagnosticTest', JSON.stringify({
+        completed: true,
+        score: finalScore,
+        totalQuestions: questions.length,
+        percentage: Math.round((finalScore/questions.length) * 100),
+        completedAt: new Date().toISOString()
+      }));
+      
+      // Clear progress cache since test is finished
+      localStorage.removeItem('diagnosticProgress');
       
       alert(`🎉 Tes Diagnostik Selesai!\n\nSkor Anda: ${finalScore}/${questions.length}\nPersentase: ${Math.round((finalScore/questions.length) * 100)}%\n\n${
         finalScore >= 7 ? 'Excellent! Pemahaman Anda sangat baik!' : 
         finalScore >= 5 ? 'Good! Anda perlu sedikit latihan lagi.' :
         'Perlu belajar lebih giat lagi!'
-      }`);
+      }\n\nAnda sekarang dapat mengakses materi pembelajaran!`);
+      
+      // Redirect to home page
+      window.location.href = '/';
     }
   };
 
   const handlePrev = () => {
     if (currentQuestionIndex > 0) {
-      setCurrentQuestionIndex(currentQuestionIndex - 1);
-      setSelectedAnswer(userAnswers[currentQuestionIndex - 1] || '');
-      setShowResult(userAnswers[currentQuestionIndex - 1] !== undefined);
-      setIsCorrect(userAnswers[currentQuestionIndex - 1] === questions[currentQuestionIndex - 1]?.correctAnswer);
+      const newQuestionIndex = currentQuestionIndex - 1;
+      setCurrentQuestionIndex(newQuestionIndex);
+      setSelectedAnswer(userAnswers[newQuestionIndex] || '');
+      setShowResult(userAnswers[newQuestionIndex] !== undefined);
+      setIsCorrect(userAnswers[newQuestionIndex] === questions[newQuestionIndex]?.correctAnswer);
+      
+      // Save progress with new question index
+      saveProgress(newQuestionIndex, userAnswers, completedQuestions, score);
     }
   };
 

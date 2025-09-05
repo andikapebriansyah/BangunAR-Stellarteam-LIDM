@@ -11,14 +11,88 @@ export default function MateriTabung() {
   const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   useEffect(() => {
+    // Load completed sections from localStorage
+    const savedCompleted = localStorage.getItem('completedTopics');
+    if (savedCompleted) {
+      const completedArray = JSON.parse(savedCompleted);
+      setCompletedTopics(new Set(completedArray));
+    }
+
+    // Also check individual section completion statuses
+    const tabungSections = tabungMateriData.sections;
     const completed = new Set();
-    setCompletedTopics(completed);
+    
+    // Check localStorage for each section completion
+    tabungSections.forEach(section => {
+      // Check if section is marked as completed
+      const sectionCompleted = localStorage.getItem(`section-completed-${section.id}`);
+      if (sectionCompleted === 'true') {
+        completed.add(section.id);
+      }
+      
+      // For sections with AR and LKPD, check if both are completed
+      if (section.type === 'exploration' || section.type === 'experiment' || section.type === 'investigation') {
+        const arCompleted = localStorage.getItem(`ar-completed-${section.id}`) === 'true';
+        const lkpdCompleted = localStorage.getItem(`lkpd-completed-${section.id}`) === 'true';
+        
+        if (arCompleted && lkpdCompleted) {
+          completed.add(section.id);
+        }
+      }
+    });
+
+    // Update completed topics and save to localStorage
+    if (completed.size > 0) {
+      setCompletedTopics(completed);
+      localStorage.setItem('completedTopics', JSON.stringify([...completed]));
+      
+      // Check if all sections are completed and save tabung progress
+      if (completed.size === tabungSections.length) {
+        localStorage.setItem('tabungProgress', JSON.stringify({
+          completed: true,
+          completedSections: [...completed],
+          completedAt: new Date().toISOString()
+        }));
+        
+        // Also update completedMaterials for homepage
+        const completedMaterials = new Set();
+        const savedMaterials = localStorage.getItem('completedMaterials');
+        if (savedMaterials) {
+          JSON.parse(savedMaterials).forEach(material => completedMaterials.add(material));
+        }
+        completedMaterials.add('tabung');
+        localStorage.setItem('completedMaterials', JSON.stringify([...completedMaterials]));
+      }
+    }
   }, []);
 
   const markAsCompleted = (sectionId) => {
     const newCompleted = new Set(completedTopics);
     newCompleted.add(sectionId);
     setCompletedTopics(newCompleted);
+    
+    // Save to localStorage
+    localStorage.setItem('completedTopics', JSON.stringify([...newCompleted]));
+    localStorage.setItem(`section-completed-${sectionId}`, 'true');
+    
+    // Check if all sections are completed
+    if (newCompleted.size === tabungMateriData.sections.length) {
+      // Save tabung completion
+      localStorage.setItem('tabungProgress', JSON.stringify({
+        completed: true,
+        completedSections: [...newCompleted],
+        completedAt: new Date().toISOString()
+      }));
+      
+      // Update completedMaterials for homepage
+      const completedMaterials = new Set();
+      const savedMaterials = localStorage.getItem('completedMaterials');
+      if (savedMaterials) {
+        JSON.parse(savedMaterials).forEach(material => completedMaterials.add(material));
+      }
+      completedMaterials.add('tabung');
+      localStorage.setItem('completedMaterials', JSON.stringify([...completedMaterials]));
+    }
     
     // Auto-open next section
     const sections = tabungMateriData.sections;
