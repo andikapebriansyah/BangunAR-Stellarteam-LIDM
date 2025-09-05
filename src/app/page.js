@@ -64,18 +64,15 @@ export default function Home() {
             </div>
           </div>
           <div className="flex items-center space-x-3">
-            {/* Quick AR Access */}
+            {/* Quick AR Access - Khusus tempat AR saja */}
             <button 
               onClick={() => setShowARSelector(true)}
-              className="bg-white bg-opacity-15 p-2 rounded-xl hover:bg-opacity-25 transition-all"
+              className="bg-white bg-opacity-15 px-4 py-2 rounded-xl hover:bg-opacity-25 transition-all flex items-center space-x-2"
               title="Quick AR Access"
             >
               <span className="text-xl">🥽</span>
+              <span className="text-sm font-medium">AR</span>
             </button>
-            <div className="bg-white bg-opacity-20 px-4 py-2 rounded-full flex items-center space-x-2">
-              <span className="text-yellow-300">⭐</span>
-              <span className="font-semibold">1,250</span>
-            </div>
           </div>
         </div>
         
@@ -113,17 +110,17 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Menu Grid */}
+        {/* Menu Grid - Materi dan Build Challenge sama lebar */}
         <div className="grid grid-cols-2 gap-4">
           {/* Materi Pembelajaran */}
           <Link href="/materi-pembelajaran">
-            <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full">
               <div className="w-12 h-12 bg-red-400 rounded-2xl mb-3 flex items-center justify-center">
                 <span className="text-white text-lg">📖</span>
               </div>
               <h3 className="font-bold text-gray-800 mb-2">Materi Pembelajaran</h3>
               <p className="text-gray-500 text-xs mb-3 leading-relaxed">
-                Pelajari bangun ruang sisi lengkung dengan visualisasi 3D
+                Pelajari bangun ruang dengan visualisasi 3D
               </p>
               <span className="text-red-500 text-xs font-medium">Mulai Belajar →</span>
             </div>
@@ -131,37 +128,36 @@ export default function Home() {
 
           {/* Build Challenge */}
           <Link href="/build-challenge-selection">
-            <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow">
+            <div className="bg-white rounded-2xl p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow h-full">
               <div className="w-12 h-12 bg-teal-400 rounded-2xl mb-3 flex items-center justify-center">
                 <span className="text-white text-lg">🎮</span>
               </div>
-              <h3 className="font-bold text-gray-800 mb-2">Daftar Build</h3>
+              <h3 className="font-bold text-gray-800 mb-2">Build Challenge</h3>
               <p className="text-gray-500 text-xs mb-3 leading-relaxed">
-                Pilih tantangan build yang ingin diselesaikan
+                Game edukatif drag & drop bangun ruang
               </p>
-              <span className="text-teal-500 text-xs font-medium">Lihat Daftar →</span>
+              <span className="text-teal-500 text-xs font-medium">Mulai Build →</span>
             </div>
           </Link>
         </div>
 
-        {/* AR Mode Card */}
-        <div 
-          onClick={() => setShowARSelector(true)}
-          className="bg-gradient-to-br from-purple-500 via-purple-600 to-blue-600 rounded-2xl p-6 text-white cursor-pointer hover:scale-105 transition-transform"
-        >
-          <div className="text-center">
-            <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <span className="text-white text-2xl">🥽</span>
+        {/* Evaluasi Card */}
+        <Link href="/evaluasi">
+          <div className="bg-gradient-to-br from-orange-500 via-orange-600 to-red-600 rounded-2xl p-6 text-white cursor-pointer hover:shadow-lg transition-shadow">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-white bg-opacity-20 rounded-2xl mx-auto mb-4 flex items-center justify-center">
+                <span className="text-white text-2xl">📊</span>
+              </div>
+              <h3 className="text-xl font-bold mb-2">Evaluasi</h3>
+              <p className="text-orange-100 text-sm mb-4 leading-relaxed">
+                Lihat progress pembelajaran dan hasil evaluasi untuk memahami perkembangan Anda
+              </p>
+              <span className="inline-block bg-white bg-opacity-20 px-6 py-2 rounded-full text-sm font-medium text-white drop-shadow-md">
+                Mulai Evaluasi →
+              </span>
             </div>
-            <h3 className="text-xl font-bold mb-2">AR Experience</h3>
-            <p className="text-purple-100 text-sm mb-4 leading-relaxed">
-              Jelajahi berbagai bangun ruang dengan Augmented Reality dan rasakan pengalaman belajar yang menakjubkan
-            </p>
-            <button className="bg-white bg-opacity-20 px-6 py-2 rounded-full text-sm font-medium hover:bg-opacity-30 transition-colors">
-              Mulai AR Experience →
-            </button>
           </div>
-        </div>
+        </Link>
 
         {/* Gabung Kelas */}
         <div className="bg-white rounded-2xl p-4 text-center shadow-sm">
@@ -173,46 +169,6 @@ export default function Home() {
             Masuk ke kelas dengan kode dari guru dan belajar bersama teman
           </p>
           <button className="text-orange-500 text-xs font-medium">Masuk Kelas →</button>
-        </div>
-
-        {/* Aktivitas Terbaru */}
-        <div className="bg-white rounded-2xl p-4 shadow-sm">
-          <h3 className="font-bold text-gray-800 mb-4">Aktivitas Terbaru</h3>
-          
-          <div className="space-y-3">
-            {/* Activity Item 1 */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-red-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-red-500 text-sm">📖</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-800 text-sm font-medium">Menyelesaikan materi &quot;Volume Kubus&quot;</p>
-                <p className="text-gray-500 text-xs">2 jam yang lalu</p>
-              </div>
-            </div>
-
-            {/* Activity Item 2 */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-teal-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-teal-500 text-sm">🎮</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-800 text-sm font-medium">Build Challenge &quot;Rumah&quot; - Skor 85</p>
-                <p className="text-gray-500 text-xs">1 hari yang lalu</p>
-              </div>
-            </div>
-
-            {/* Activity Item 3 */}
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-purple-500 text-sm">🥽</span>
-              </div>
-              <div className="flex-1">
-                <p className="text-gray-800 text-sm font-medium">Eksplorasi AR Prisma Segitiga</p>
-                <p className="text-gray-500 text-xs">2 hari yang lalu</p>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Debug Button - Development Only */}

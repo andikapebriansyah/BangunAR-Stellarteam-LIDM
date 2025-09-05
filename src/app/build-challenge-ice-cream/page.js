@@ -155,11 +155,11 @@ export default function BuildChallengeIceCream() {
     blueprint.forEach(item => {
       const targetMesh = createMesh(item.type, item.color, selectedSize);
       
-      // Use simpler ghost material for better performance
+      // Use simpler ghost material for better performance tapi masih terlihat
       const ghostMaterial = new THREE.MeshBasicMaterial({
         color: item.color,
         transparent: true,
-        opacity: 0.3,
+        opacity: 0.4,
         side: THREE.DoubleSide // Ensure visibility from all angles
       });
       
@@ -177,7 +177,7 @@ export default function BuildChallengeIceCream() {
     });
 
     sceneRef.current.add(targetGroup);
-  }, [selectedSize]);
+  }, [selectedSize, createMesh]);
 
   // Handle client-side mounting and mobile detection
   useEffect(() => {
@@ -252,7 +252,8 @@ export default function BuildChallengeIceCream() {
       renderer.shadowMap.enabled = false; // Disable shadows on mobile
     }
     
-    renderer.setClearColor(0xF1F5F9, 1); // Light gray background yang modern
+    // Use transparent background untuk better blending dengan gradient
+    renderer.setClearColor(0x000000, 0);
     rendererRef.current = renderer;
     
     // Ensure mount is still available before appending
@@ -264,7 +265,121 @@ export default function BuildChallengeIceCream() {
     }
 
     const scene = sceneRef.current;
-    scene.background = new THREE.Color(0xF1F5F9); // Light gray background yang modern
+    // Create animated background scene
+    const createAnimatedBackground = () => {
+      // Gradient sky background dengan starfield effect
+      const skyGeometry = new THREE.SphereGeometry(100, 32, 32);
+      const skyTexture = createGradientTexture();
+      const skyMaterial = new THREE.MeshBasicMaterial({ 
+        map: skyTexture, 
+        side: THREE.BackSide 
+      });
+      const skyMesh = new THREE.Mesh(skyGeometry, skyMaterial);
+      scene.add(skyMesh);
+      
+      // Add floating geometric wireframes untuk atmosphere matematika
+      const createFloatingGeometries = () => {
+        const geometryCount = isMobile ? 8 : 15;
+        const floatingGeometries = new THREE.Group();
+        
+        for (let i = 0; i < geometryCount; i++) {
+          let geometry;
+          const rand = Math.random();
+          
+          // Pilih berbagai geometry jaring-jaring
+          if (rand < 0.3) {
+            // Wireframe cube/balok
+            geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
+          } else if (rand < 0.6) {
+            // Wireframe sphere/bola
+            geometry = new THREE.SphereGeometry(0.5, 8, 6);
+          } else if (rand < 0.8) {
+            // Wireframe cone/kerucut
+            geometry = new THREE.ConeGeometry(0.4, 1, 8);
+          } else {
+            // Wireframe cylinder/tabung
+            geometry = new THREE.CylinderGeometry(0.3, 0.3, 0.8, 8);
+          }
+          
+          // Material wireframe dengan warna yang lembut
+          const material = new THREE.MeshBasicMaterial({
+            color: new THREE.Color().setHSL(0.6 + Math.random() * 0.2, 0.3, 0.7),
+            wireframe: true,
+            transparent: true,
+            opacity: 0.2 + Math.random() * 0.2
+          });
+          
+          const mesh = new THREE.Mesh(geometry, material);
+          
+          // Posisi random dalam ruang 3D
+          mesh.position.set(
+            (Math.random() - 0.5) * 35,
+            Math.random() * 25 + 5,
+            (Math.random() - 0.5) * 35
+          );
+          
+          // Rotasi random
+          mesh.rotation.set(
+            Math.random() * Math.PI * 2,
+            Math.random() * Math.PI * 2,
+            Math.random() * Math.PI * 2
+          );
+          
+          // Scale random
+          const scale = 0.5 + Math.random() * 1.5;
+          mesh.scale.set(scale, scale, scale);
+          
+          // Store initial values untuk animasi
+          mesh.userData.initialY = mesh.position.y;
+          mesh.userData.floatSpeed = 0.5 + Math.random() * 1;
+          mesh.userData.rotateSpeed = 0.001 + Math.random() * 0.002;
+          
+          floatingGeometries.add(mesh);
+        }
+        
+        scene.add(floatingGeometries);
+        return floatingGeometries;
+      };
+      
+      const floatingGeometries = createFloatingGeometries();
+      
+      // Store reference for animation
+      scene.userData.floatingGeometries = floatingGeometries;
+      scene.userData.skyMesh = skyMesh;
+    };
+    
+    // Helper function to create gradient texture
+    const createGradientTexture = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 256;
+      canvas.height = 256;
+      const context = canvas.getContext('2d');
+      
+      // Create beautiful gradient similar to AR background
+      const gradient = context.createRadialGradient(128, 128, 0, 128, 128, 128);
+      gradient.addColorStop(0, '#1e1b4b');    // Deep purple center
+      gradient.addColorStop(0.3, '#1e3a8a');  // Blue
+      gradient.addColorStop(0.7, '#374151');  // Gray
+      gradient.addColorStop(1, '#111827');    // Dark edge
+      
+      context.fillStyle = gradient;
+      context.fillRect(0, 0, 256, 256);
+      
+      // Add some stars
+      context.fillStyle = 'rgba(255,255,255,0.8)';
+      for (let i = 0; i < 30; i++) {
+        const x = Math.random() * 256;
+        const y = Math.random() * 256;
+        const size = Math.random() * 2;
+        context.beginPath();
+        context.arc(x, y, size, 0, Math.PI * 2);
+        context.fill();
+      }
+      
+      return new THREE.CanvasTexture(canvas);
+    };
+    
+    createAnimatedBackground();
 
     const camera = cameraRef.current;
     // Fix camera aspect ratio based on actual dimensions
@@ -306,26 +421,32 @@ export default function BuildChallengeIceCream() {
     
     controlsRef.current = controls;
 
-    // Simplified lighting for better performance
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
+    // Enhanced lighting untuk background yang gelap
+    const ambientLight = new THREE.AmbientLight(0x4080ff, 0.4); // Soft blue ambient
     scene.add(ambientLight);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.6);
+    const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
     directionalLight.position.set(5, 10, 7.5);
     
     if (!isMobile) {
       directionalLight.castShadow = true;
-      directionalLight.shadow.mapSize.width = 512;
-      directionalLight.shadow.mapSize.height = 512;
+      directionalLight.shadow.mapSize.width = 1024;
+      directionalLight.shadow.mapSize.height = 1024;
       directionalLight.shadow.camera.near = 0.5;
       directionalLight.shadow.camera.far = 50;
     }
     
     scene.add(directionalLight);
+    
+    // Add rim light untuk better shape definition
+    const rimLight = new THREE.DirectionalLight(0x80c0ff, 0.3);
+    rimLight.position.set(-5, 5, -5);
+    scene.add(rimLight);
 
-    // Create checkered ground
+    // Create ground dengan warna plain seperti kode awal
     const groundGeometry = new THREE.PlaneGeometry(30, 30, 30, 30);
     
+    // Create checkered pattern seperti sebelumnya
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
@@ -360,34 +481,20 @@ export default function BuildChallengeIceCream() {
     scene.add(groundPlane);
     groundPlaneRef.current = groundPlane;
 
-    // Add boundary walls
-    const wallHeight = 10;
-    const wallThickness = 0.5;
-    const groundSize = 15;
-    
-    const wallMaterial = new THREE.MeshLambertMaterial({ 
-      color: 0xE5E7EB, 
+    // Add very subtle boundary indicators
+    const boundaryRadius = 15;
+    const boundaryGeometry = new THREE.RingGeometry(boundaryRadius - 0.2, boundaryRadius, 64);
+    const boundaryMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0x2563eb, 
       transparent: true, 
-      opacity: 0.3,
+      opacity: 0.1,
       side: THREE.DoubleSide
     });
     
-    // Create walls
-    const walls = [
-      { pos: [-groundSize, wallHeight/2, 0], size: [wallThickness, wallHeight, groundSize * 2] },
-      { pos: [groundSize, wallHeight/2, 0], size: [wallThickness, wallHeight, groundSize * 2] },
-      { pos: [0, wallHeight/2, -groundSize], size: [groundSize * 2, wallHeight, wallThickness] },
-      { pos: [0, wallHeight/2, groundSize], size: [groundSize * 2, wallHeight, wallThickness] }
-    ];
-    
-    walls.forEach(wall => {
-      const wallMesh = new THREE.Mesh(
-        new THREE.BoxGeometry(...wall.size),
-        wallMaterial
-      );
-      wallMesh.position.set(...wall.pos);
-      scene.add(wallMesh);
-    });
+    const boundaryRing = new THREE.Mesh(boundaryGeometry, boundaryMaterial);
+    boundaryRing.rotation.x = -Math.PI / 2;
+    boundaryRing.position.y = 0.005; // Barely above ground
+    scene.add(boundaryRing);
 
     if (typeof window !== 'undefined') {
       window.addEventListener('resize', onWindowResize);
@@ -423,7 +530,7 @@ export default function BuildChallengeIceCream() {
       intersectionObserver.observe(mount);
     }
 
-    // Animation loop
+    // Animation loop dengan background effects
     let lastTime = 0;
     let frameCount = 0;
     let fpsTime = 0;
@@ -447,6 +554,34 @@ export default function BuildChallengeIceCream() {
         const camera = cameraRef.current;
         
         if (controls && renderer && scene && camera) {
+          // Animate floating geometric wireframes
+          if (scene.userData.floatingGeometries) {
+            const geometries = scene.userData.floatingGeometries;
+            
+            geometries.children.forEach((mesh, index) => {
+              // Gentle floating animation
+              const time = currentTime * 0.001;
+              mesh.position.y = mesh.userData.initialY + Math.sin(time * mesh.userData.floatSpeed + index) * 2;
+              
+              // Slow rotation animation
+              mesh.rotation.x += mesh.userData.rotateSpeed;
+              mesh.rotation.y += mesh.userData.rotateSpeed * 0.7;
+              mesh.rotation.z += mesh.userData.rotateSpeed * 0.5;
+              
+              // Reset geometries yang terlalu tinggi
+              if (mesh.position.y > 30) {
+                mesh.position.y = -5;
+                mesh.position.x = (Math.random() - 0.5) * 35;
+                mesh.position.z = (Math.random() - 0.5) * 35;
+              }
+            });
+          }
+          
+          // Slow sky rotation for dynamic effect
+          if (scene.userData.skyMesh && !isMobile) {
+            scene.userData.skyMesh.rotation.y += 0.0002;
+          }
+          
           controls.update();
           renderer.render(scene, camera);
         }
