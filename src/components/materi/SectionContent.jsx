@@ -53,11 +53,11 @@ export default function SectionContent({ section, markAsCompleted }) {
         {/* Real Life Examples */}
         <div className="bg-white rounded-2xl p-6">
           <h3 className="font-bold text-gray-800 mb-4">🔍 Temukan Tabung di Sekitarmu</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
             {content.realLifeExamples.map((example, i) => (
               <div key={i} className="bg-cyan-50 rounded-lg p-4 border border-cyan-200">
                 <div className="mb-3">
-                  <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden">
+                  <div className="w-full h-32 sm:h-36 lg:h-32 bg-gray-200 rounded-lg overflow-hidden">
                     <img 
                       src={`/materi/tabung_examples/${example.name.toLowerCase().replace(/\s+/g, '_')}.jpg`}
                       alt={example.name}
@@ -69,19 +69,19 @@ export default function SectionContent({ section, markAsCompleted }) {
                     />
                     <div className="w-full h-full bg-gradient-to-br from-cyan-100 to-blue-100 border-2 border-dashed border-cyan-300 rounded-lg flex items-center justify-center" style={{ display: 'none' }}>
                       <div className="text-center p-2">
-                        <div className="text-2xl mb-1">🥤</div>
-                        <div className="text-xs text-gray-600 font-medium">{example.name}</div>
+                        <div className="text-xl sm:text-2xl mb-1">🥤</div>
+                        <div className="text-xs text-gray-600 font-medium break-words">{example.name}</div>
                         <div className="text-xs text-gray-500 mt-1">Image placeholder</div>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex items-center mb-2">
-                  <h4 className="font-semibold text-gray-800">{example.name}</h4>
+                  <h4 className="font-semibold text-gray-800 text-sm sm:text-base">{example.name}</h4>
                 </div>
-                <p className="text-gray-600 text-sm mb-2">{example.description}</p>
+                <p className="text-gray-600 text-xs sm:text-sm mb-2 leading-relaxed">{example.description}</p>
                 <div className="bg-white rounded p-3 border-l-4 border-orange-500">
-                  <p className="text-orange-700 text-sm font-medium">🤔 {example.question}</p>
+                  <p className="text-orange-700 text-xs sm:text-sm font-medium break-words">🤔 {example.question}</p>
                 </div>
               </div>
             ))}
@@ -210,16 +210,6 @@ export default function SectionContent({ section, markAsCompleted }) {
               ✅ AR Selesai - Lanjut ke LKPD
             </button>
           )}
-          
-          {/* Manual completion button for testing - remove in production */}
-          {!arCompleted && (
-            <button 
-              onClick={handleArCompletion}
-              className="ml-4 bg-white/20 text-white px-4 py-2 rounded-lg text-sm hover:bg-white/30 transition-colors"
-            >
-              🔧 Tandai AR Selesai (Test)
-            </button>
-          )}
         </div>
 
         {/* LKPD Section - Only shows after AR completion */}
@@ -243,20 +233,15 @@ export default function SectionContent({ section, markAsCompleted }) {
                 </div>
                 <div className="flex space-x-2">
                   <a href={content.lkpdLink} target="_blank" rel="noopener noreferrer">
-                    <button className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      lkpdCompleted ? 'bg-green-200 text-green-800' : 'bg-green-500 text-white hover:bg-green-600'
-                    }`}>
+                    <button 
+                      onClick={handleLkpdCompletion}
+                      className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                        lkpdCompleted ? 'bg-green-200 text-green-800' : 'bg-green-500 text-white hover:bg-green-600'
+                      }`}
+                    >
                       {lkpdCompleted ? '✅ Sudah Selesai' : '📝 Buka LKPD'}
                     </button>
                   </a>
-                  {!lkpdCompleted && (
-                    <button 
-                      onClick={handleLkpdCompletion}
-                      className="bg-green-200 text-green-700 px-3 py-2 rounded-lg text-sm hover:bg-green-300 transition-colors"
-                    >
-                      ✓ Tandai Selesai
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
@@ -439,20 +424,15 @@ export default function SectionContent({ section, markAsCompleted }) {
               </div>
               <div className="flex space-x-2">
                 <a href={content.lkpdLink} target="_blank" rel="noopener noreferrer">
-                  <button className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    lkpdCompleted ? 'bg-green-200 text-green-800' : 'bg-blue-500 text-white hover:bg-blue-600'
-                  }`}>
+                  <button 
+                    onClick={handleLkpdCompletion}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      lkpdCompleted ? 'bg-green-200 text-green-800' : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
                     {lkpdCompleted ? '✅ Sudah Selesai' : '📝 Mulai Eksperimen'}
                   </button>
                 </a>
-                {!lkpdCompleted && (
-                  <button 
-                    onClick={handleLkpdCompletion}
-                    className="bg-blue-200 text-blue-700 px-3 py-2 rounded-lg text-sm hover:bg-blue-300 transition-colors"
-                  >
-                    ✓ Tandai Selesai
-                  </button>
-                )}
               </div>
             </div>
           </div>
@@ -626,20 +606,15 @@ export default function SectionContent({ section, markAsCompleted }) {
               </div>
               <div className="flex space-x-2">
                 <a href={content.lkpdLink} target="_blank" rel="noopener noreferrer">
-                  <button className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    lkpdCompleted ? 'bg-green-200 text-green-800' : 'bg-purple-500 text-white hover:bg-purple-600'
-                  }`}>
+                  <button 
+                    onClick={handleLkpdCompletion}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      lkpdCompleted ? 'bg-green-200 text-green-800' : 'bg-purple-500 text-white hover:bg-purple-600'
+                    }`}
+                  >
                     {lkpdCompleted ? '✅ Sudah Selesai' : '📝 Mulai Investigasi'}
                   </button>
                 </a>
-                {!lkpdCompleted && (
-                  <button 
-                    onClick={handleLkpdCompletion}
-                    className="bg-purple-200 text-purple-700 px-3 py-2 rounded-lg text-sm hover:bg-purple-300 transition-colors"
-                  >
-                    ✓ Tandai Selesai
-                  </button>
-                )}
               </div>
             </div>
           </div>
