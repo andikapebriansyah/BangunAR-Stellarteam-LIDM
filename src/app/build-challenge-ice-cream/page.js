@@ -7,36 +7,40 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { Suspense } from 'react';
 import Link from 'next/link';
 
-// Tentukan cetak biru (blueprint) untuk level
+// Tentukan cetak biru (blueprint) untuk level es krim
 const levelBlueprint = {
-  name: 'Bangun Rumah Sederhana',
+  name: 'Bangun Es Krim Berlayer',
   blueprint: [
-    { type: 'cube', position: new THREE.Vector3(0, 0.6, 0), color: 0x6366F1 }, // Balok untuk badan rumah 
-    { type: 'prism', position: new THREE.Vector3(0, 1.2, 0), color: 0xF59E0B }, // Prisma di atas kubus - perbaiki tinggi
+    { type: 'cone_waffle', position: new THREE.Vector3(0, 0.6, 0), color: 0x8B4513 }, // Cone terbalik untuk waffle (coklat tua)
+    { type: 'sphere_cream_large', position: new THREE.Vector3(0, 1.4, 0), color: 0xE6F3FF }, // Sphere es krim besar vanilla
+    { type: 'sphere_cream_small', position: new THREE.Vector3(0, 2.1, 0), color: 0xFFCCE5 }, // Sphere es krim kecil strawberry
   ],
-  limits: { cube: 1, prism: 1 }
+  limits: { cone_waffle: 1, sphere_cream_large: 1, sphere_cream_small: 1 }
 };
 
 // Main App Component
-export default function BuildChallenge() {
+export default function BuildChallengeIceCream() {
   const router = useRouter();
   
   // UI and game state
   const [completionMessage, setCompletionMessage] = useState('Pilih ukuran dan tambahkan objek!');
   const [isLevelComplete, setIsLevelComplete] = useState(false);
-  const [placedObjectCounts, setPlacedObjectCounts] = useState({ cube: 0, prism: 0 });
+  const [placedObjectCounts, setPlacedObjectCounts] = useState({ cone_waffle: 0, sphere_cream_large: 0, sphere_cream_small: 0 });
   const [selectedSize, setSelectedSize] = useState(1);
   const [selectedObjectInfo, setSelectedObjectInfo] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
   const [showAnalysis, setShowAnalysis] = useState(false);
   const [performanceMode, setPerformanceMode] = useState(false);
   const [isLoading3D, setIsLoading3D] = useState(true);
+  const [rendererReady, setRendererReady] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [fps, setFps] = useState(0);
 
   // 3D Scene Refs
   const mountRef = useRef(null);
   const sceneRef = useRef(new THREE.Scene());
-  const cameraRef = useRef(new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000));
+  const cameraRef = useRef(new THREE.PerspectiveCamera(75, 1, 0.1, 1000)); // Use default aspect ratio
   const rendererRef = useRef(null);
   const controlsRef = useRef(null);
   const raycasterRef = useRef(new THREE.Raycaster());
@@ -48,47 +52,49 @@ export default function BuildChallenge() {
   const dragPlaneRef = useRef(new THREE.Plane());
 
   // Function to create a mesh based on type and scale
-  const createMesh = (type, color, scale) => {
+  const createMesh = useCallback((type, color, scale) => {
     let geometry;
     let height;
-    const isMobile = window.innerWidth <= 768;
     
-    if (type === 'cube') {
-      // Create a rectangular block (balok) - proporsional untuk rumah
-      geometry = new THREE.BoxGeometry(scale * 2, scale * 1.2, scale * 1.5);
-      height = scale * 1.2;
-    } else if (type === 'prism') {
-      // Create a triangular prism for the roof - kembali ke ExtrudeGeometry
-      const shape = new THREE.Shape();
-      const width = 2.0 * scale; // Sama dengan lebar kubus
-      const roofHeight = 1.0 * scale; // Tinggi atap yang proporsional
-      
-      // Create triangle shape for roof
-      shape.moveTo(-width/2, 0);
-      shape.lineTo(width/2, 0);
-      shape.lineTo(0, roofHeight);
-      shape.lineTo(-width/2, 0);
-      
-      const extrudeSettings = {
-        depth: scale * 1.5, // Sama dengan kedalaman balok
-        bevelEnabled: false,
-        steps: 1
-      };
-      
-      geometry = new THREE.ExtrudeGeometry(shape, extrudeSettings);
-      
-      // Hanya perbaiki center Z agar sama dengan kubus
-      geometry.translate(0, 0, -scale * 1.5 / 2);
-      
-      height = roofHeight;
+    if (type === 'cone_waffle') {
+      // Create inverted cone for waffle (terbalik ke bawah)
+      const radius = 0.5 * scale;
+      const coneHeight = 1.2 * scale;
+      geometry = new THREE.ConeGeometry(radius, coneHeight, 12);
+      // Flip the cone upside down (terbalik)
+      geometry.rotateX(Math.PI); // Rotate 180 degrees around X axis
+      height = coneHeight;
+    } else if (type === 'sphere_cream_large') {
+      // Create large sphere for ice cream (layer bawah) - lebih realistic
+      const radius = 0.6 * scale;
+      geometry = new THREE.SphereGeometry(radius, 16, 12);
+      height = radius * 2;
+    } else if (type === 'sphere_cream_small') {
+      // Create small sphere for ice cream (layer atas) - lebih realistic
+      const radius = 0.45 * scale;
+      geometry = new THREE.SphereGeometry(radius, 16, 12);
+      height = radius * 2;
     }
     
-    // Use better materials with nice colors
-    const material = new THREE.MeshPhongMaterial({ 
-      color,
-      shininess: 30,
-      transparent: false
-    });
+    // Use better materials with modern ice cream colors
+    let material;
+    if (type === 'cone_waffle') {
+      // Waffle cone texture dengan pola
+      material = new THREE.MeshPhongMaterial({ 
+        color,
+        shininess: 10,
+        transparent: false,
+        bumpScale: 0.2
+      });
+    } else {
+      // Ice cream dengan efek glossy modern
+      material = new THREE.MeshPhongMaterial({ 
+        color,
+        shininess: 100,
+        transparent: false,
+        emissive: new THREE.Color(color).multiplyScalar(0.1) // Subtle glow
+      });
+    }
       
     const mesh = new THREE.Mesh(geometry, material);
     mesh.userData.type = type;
@@ -101,28 +107,29 @@ export default function BuildChallenge() {
     }
     
     return mesh;
-  };
+  }, [isMobile]); // Add dependency for isMobile
   
   // Calculate volume and surface area
   const getObjectCalculations = useCallback((object) => {
     const scale = object.userData.scale;
     let volume, surfaceArea;
-    if (object.userData.type === 'cube') {
-      // Rectangular block calculations - dimensions updated
-      const width = 2 * scale;
+    if (object.userData.type === 'cone_waffle') {
+      // Cone calculations for waffle
+      const radius = 0.5 * scale;
       const height = 1.2 * scale;
-      const depth = 1.5 * scale;
-      volume = width * height * depth;
-      surfaceArea = 2 * (width * height + width * depth + height * depth);
-    } else if (object.userData.type === 'prism') {
-      // Triangular prism calculations - dimensions updated to match cube
-      const baseWidth = 2.0 * scale; // Sama dengan lebar kubus
-      const roofHeight = 1.0 * scale;
-      const depth = 1.5 * scale;
-      const baseArea = (baseWidth * roofHeight) / 2;
-      const sideLength = Math.sqrt((baseWidth/2) * (baseWidth/2) + roofHeight * roofHeight);
-      volume = baseArea * depth;
-      surfaceArea = (2 * baseArea) + (baseWidth * depth) + (2 * sideLength * depth);
+      const slantHeight = Math.sqrt(radius * radius + height * height);
+      volume = (1/3) * Math.PI * radius * radius * height;
+      surfaceArea = Math.PI * radius * radius + Math.PI * radius * slantHeight;
+    } else if (object.userData.type === 'sphere_cream_large') {
+      // Sphere calculations for large cream
+      const radius = 0.6 * scale;
+      volume = (4/3) * Math.PI * radius * radius * radius;
+      surfaceArea = 4 * Math.PI * radius * radius;
+    } else if (object.userData.type === 'sphere_cream_small') {
+      // Sphere calculations for small cream
+      const radius = 0.45 * scale;
+      volume = (4/3) * Math.PI * radius * radius * radius;
+      surfaceArea = 4 * Math.PI * radius * radius;
     }
     return {
       volume: volume.toFixed(2),
@@ -172,22 +179,68 @@ export default function BuildChallenge() {
     sceneRef.current.add(targetGroup);
   }, [selectedSize]);
 
+  // Handle client-side mounting and mobile detection
+  useEffect(() => {
+    setIsMounted(true);
+    setIsMobile(window.innerWidth <= 768);
+    
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Scene setup
   useEffect(() => {
+    // Wait for client-side mount
+    if (!isMounted) return;
+    
     const mount = mountRef.current;
     if (!mount) return;
 
-    // Mobile performance optimizations
-    const isMobile = window.innerWidth <= 768;
-    const pixelRatio = Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2);
-    
-    const renderer = new THREE.WebGLRenderer({ 
-      antialias: !isMobile, // Disable antialiasing on mobile
-      alpha: true,
-      powerPreference: "low-power" // Use integrated GPU if available
-    });
-    renderer.setPixelRatio(pixelRatio);
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
+    // Define variables in main scope for cleanup access
+    let resizeObserver;
+    let intersectionObserver;
+    let animationId;
+
+    // Define resize function in main scope for cleanup access
+    const onWindowResize = () => {
+      const renderer = rendererRef.current;
+      const camera = cameraRef.current;
+      if (!mount || !camera || !renderer) return;
+      
+      const rect = mount.getBoundingClientRect();
+      const width = rect.width || mount.clientWidth || mount.offsetWidth;
+      const height = rect.height || mount.clientHeight || mount.offsetHeight;
+      
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.setSize(width, height);
+    };
+
+    // Wait for next frame to ensure DOM is fully rendered
+    const initTimeout = setTimeout(() => {
+      // Double check mount is still available
+      if (!mount || !mountRef.current) return;
+      
+      // Mobile performance optimizations - use state instead of direct window access
+      const pixelRatio = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio, isMobile ? 1.5 : 2) : 1;
+      
+      const renderer = new THREE.WebGLRenderer({ 
+        antialias: !isMobile, // Disable antialiasing on mobile
+        alpha: true,
+        powerPreference: "low-power" // Use integrated GPU if available
+      });
+      renderer.setPixelRatio(pixelRatio);
+      
+      // Force proper sizing calculation
+      const rect = mount.getBoundingClientRect();
+      const width = rect.width || mount.clientWidth || mount.offsetWidth;
+      const height = rect.height || mount.clientHeight || mount.offsetHeight;
+      
+      renderer.setSize(width, height);
     
     // Disable expensive features on mobile
     if (!isMobile) {
@@ -201,12 +254,22 @@ export default function BuildChallenge() {
     
     renderer.setClearColor(0xF1F5F9, 1); // Light gray background yang modern
     rendererRef.current = renderer;
-    mount.appendChild(renderer.domElement);
+    
+    // Ensure mount is still available before appending
+    if (mount && mountRef.current) {
+      mount.appendChild(renderer.domElement);
+      
+      // Set renderer ready state only after successfully added to DOM
+      setRendererReady(true);
+    }
 
     const scene = sceneRef.current;
     scene.background = new THREE.Color(0xF1F5F9); // Light gray background yang modern
 
     const camera = cameraRef.current;
+    // Fix camera aspect ratio based on actual dimensions
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
     camera.position.set(5, 5, 5);
     camera.lookAt(0, 0, 0);
 
@@ -214,32 +277,29 @@ export default function BuildChallenge() {
     controls.enableDamping = true;
     controls.dampingFactor = 0.1;
     
-    // Limit camera movement for better user experience - lebih ketat
-    controls.maxDistance = 10; // Tidak bisa terlalu jauh agar objek tetap terlihat
-    controls.minDistance = 4;  // Tidak bisa terlalu dekat
-    controls.maxPolarAngle = Math.PI * 0.7; // Tidak bisa melihat dari bawah
-    controls.minPolarAngle = Math.PI * 0.15;  // Tidak bisa terlalu dari atas
+    // Limit camera movement for better user experience
+    controls.maxDistance = 10;
+    controls.minDistance = 4;
+    controls.maxPolarAngle = Math.PI * 0.7;
+    controls.minPolarAngle = Math.PI * 0.15;
     
     // Batasi target kamera agar tidak keluar dari area
     const boundarySize = 12;
     controls.addEventListener('change', () => {
-      // Batasi target kamera
       controls.target.x = Math.max(-boundarySize, Math.min(boundarySize, controls.target.x));
       controls.target.z = Math.max(-boundarySize, Math.min(boundarySize, controls.target.z));
       controls.target.y = Math.max(0, Math.min(8, controls.target.y));
       
-      // Batasi posisi kamera
       if (camera.position.x > boundarySize) camera.position.x = boundarySize;
       if (camera.position.x < -boundarySize) camera.position.x = -boundarySize;
       if (camera.position.z > boundarySize) camera.position.z = boundarySize;
       if (camera.position.z < -boundarySize) camera.position.z = -boundarySize;
-      if (camera.position.y < 1) camera.position.y = 1; // Tidak bisa masuk ke ground
+      if (camera.position.y < 1) camera.position.y = 1;
     });
     
-    // Limit controls for mobile
     if (isMobile) {
       controls.enableZoom = true;
-      controls.enablePan = false; // Disable panning on mobile
+      controls.enablePan = false;
       controls.maxDistance = 8;
       controls.minDistance = 5;
     }
@@ -255,7 +315,7 @@ export default function BuildChallenge() {
     
     if (!isMobile) {
       directionalLight.castShadow = true;
-      directionalLight.shadow.mapSize.width = 512; // Reduced shadow quality
+      directionalLight.shadow.mapSize.width = 512;
       directionalLight.shadow.mapSize.height = 512;
       directionalLight.shadow.camera.near = 0.5;
       directionalLight.shadow.camera.far = 50;
@@ -263,32 +323,29 @@ export default function BuildChallenge() {
     
     scene.add(directionalLight);
 
-    // Create an attractive checkered ground for kids - diperbesar lagi
-    const groundGeometry = new THREE.PlaneGeometry(30, 30, 30, 30); // Diperbesar dari 16x16 ke 30x30
+    // Create checkered ground
+    const groundGeometry = new THREE.PlaneGeometry(30, 30, 30, 30);
     
-    // Create a canvas for modern checkered pattern
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 512;
     const context = canvas.getContext('2d');
     
-    // Draw modern checkered pattern dengan warna yang lebih bagus
     const squares = 8;
     const squareSize = canvas.width / squares;
     
     for (let i = 0; i < squares; i++) {
       for (let j = 0; j < squares; j++) {
         const isOdd = (i + j) % 2 === 1;
-        context.fillStyle = isOdd ? '#E5E7EB' : '#F3F4F6'; // Modern gray shades
+        context.fillStyle = isOdd ? '#E5E7EB' : '#F3F4F6';
         context.fillRect(i * squareSize, j * squareSize, squareSize, squareSize);
       }
     }
     
-    // Create texture from canvas
     const groundTexture = new THREE.CanvasTexture(canvas);
     groundTexture.wrapS = THREE.RepeatWrapping;
     groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(4, 4); // Repeat pattern untuk ground yang lebih besar
+    groundTexture.repeat.set(4, 4);
     
     const groundMaterial = new THREE.MeshLambertMaterial({ 
       map: groundTexture,
@@ -303,10 +360,10 @@ export default function BuildChallenge() {
     scene.add(groundPlane);
     groundPlaneRef.current = groundPlane;
 
-    // Tambahkan dinding pembatas dengan visual yang lebih jelas
+    // Add boundary walls
     const wallHeight = 10;
     const wallThickness = 0.5;
-    const groundSize = 15; // Setengah dari ground size (30/2)
+    const groundSize = 15;
     
     const wallMaterial = new THREE.MeshLambertMaterial({ 
       color: 0xE5E7EB, 
@@ -315,57 +372,67 @@ export default function BuildChallenge() {
       side: THREE.DoubleSide
     });
     
-    // Dinding kiri
-    const leftWall = new THREE.Mesh(
-      new THREE.BoxGeometry(wallThickness, wallHeight, groundSize * 2),
-      wallMaterial
-    );
-    leftWall.position.set(-groundSize, wallHeight/2, 0);
-    scene.add(leftWall);
+    // Create walls
+    const walls = [
+      { pos: [-groundSize, wallHeight/2, 0], size: [wallThickness, wallHeight, groundSize * 2] },
+      { pos: [groundSize, wallHeight/2, 0], size: [wallThickness, wallHeight, groundSize * 2] },
+      { pos: [0, wallHeight/2, -groundSize], size: [groundSize * 2, wallHeight, wallThickness] },
+      { pos: [0, wallHeight/2, groundSize], size: [groundSize * 2, wallHeight, wallThickness] }
+    ];
     
-    // Dinding kanan  
-    const rightWall = new THREE.Mesh(
-      new THREE.BoxGeometry(wallThickness, wallHeight, groundSize * 2),
-      wallMaterial
-    );
-    rightWall.position.set(groundSize, wallHeight/2, 0);
-    scene.add(rightWall);
-    
-    // Dinding depan
-    const frontWall = new THREE.Mesh(
-      new THREE.BoxGeometry(groundSize * 2, wallHeight, wallThickness),
-      wallMaterial
-    );
-    frontWall.position.set(0, wallHeight/2, -groundSize);
-    scene.add(frontWall);
-    
-    // Dinding belakang
-    const backWall = new THREE.Mesh(
-      new THREE.BoxGeometry(groundSize * 2, wallHeight, wallThickness),
-      wallMaterial
-    );
-    backWall.position.set(0, wallHeight/2, groundSize);
-    scene.add(backWall);
+    walls.forEach(wall => {
+      const wallMesh = new THREE.Mesh(
+        new THREE.BoxGeometry(...wall.size),
+        wallMaterial
+      );
+      wallMesh.position.set(...wall.pos);
+      scene.add(wallMesh);
+    });
 
-    const onWindowResize = () => {
-      camera.aspect = mount.clientWidth / mount.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(mount.clientWidth, mount.clientHeight);
-    };
-    window.addEventListener('resize', onWindowResize);
+    if (typeof window !== 'undefined') {
+      window.addEventListener('resize', onWindowResize);
+    }
+    
+    // Also trigger resize after a short delay to fix initial load issues
+    setTimeout(onWindowResize, 200);
+    setTimeout(onWindowResize, 500); // Additional resize check
+    setTimeout(onWindowResize, 1000); // Final resize check
+    
+    // Add ResizeObserver to watch container size changes
+    if (typeof window !== 'undefined' && window.ResizeObserver) {
+      resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          if (entry.target === mount) {
+            onWindowResize();
+          }
+        }
+      });
+      resizeObserver.observe(mount);
+    }
+    
+    // Add IntersectionObserver to handle visibility changes (scroll fix)
+    if (typeof window !== 'undefined' && window.IntersectionObserver) {
+      intersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting && entry.target === mount) {
+            // When element becomes visible, trigger a resize
+            setTimeout(onWindowResize, 50);
+          }
+        });
+      }, { threshold: 0.1 });
+      intersectionObserver.observe(mount);
+    }
 
-    // Optimized animation loop
-    let animationId;
+    // Animation loop
     let lastTime = 0;
     let frameCount = 0;
     let fpsTime = 0;
-    const targetFPS = isMobile ? 30 : 60; // Lower FPS on mobile
+    const targetFPS = isMobile ? 30 : 60;
     const interval = 1000 / targetFPS;
 
     const animate = (currentTime) => {
       animationId = requestAnimationFrame(animate);
       
-      // FPS monitoring
       frameCount++;
       if (currentTime - fpsTime >= 1000) {
         setFps(frameCount);
@@ -374,32 +441,73 @@ export default function BuildChallenge() {
       }
       
       if (currentTime - lastTime >= interval) {
-        controls.update();
-        renderer.render(scene, camera);
+        const controls = controlsRef.current;
+        const renderer = rendererRef.current;
+        const scene = sceneRef.current;
+        const camera = cameraRef.current;
+        
+        if (controls && renderer && scene && camera) {
+          controls.update();
+          renderer.render(scene, camera);
+        }
         lastTime = currentTime;
       }
     };
 
-    // Set loading to false after first render
     setTimeout(() => setIsLoading3D(false), 500);
-    
     animate(0);
     renderTargetBlueprint();
+    
+    // Additional safety render after initialization
+    setTimeout(() => {
+      const renderer = rendererRef.current;
+      const scene = sceneRef.current;
+      const camera = cameraRef.current;
+      if (renderer && scene && camera) {
+        renderer.render(scene, camera);
+      }
+    }, 600);
+    }, 300); // Increase timeout to ensure proper DOM ready
 
     return () => {
-      window.removeEventListener('resize', onWindowResize);
+      clearTimeout(initTimeout);
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('resize', onWindowResize);
+      }
+      
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+      
+      if (intersectionObserver) {
+        intersectionObserver.disconnect();
+      }
+      
       if (animationId) {
         cancelAnimationFrame(animationId);
       }
-      if (mount.contains(renderer.domElement)) {
+      
+      const renderer = rendererRef.current;
+      if (mount && renderer && mount.contains(renderer.domElement)) {
         mount.removeChild(renderer.domElement);
       }
-      renderer.dispose();
+      
+      if (renderer) {
+        renderer.dispose();
+      }
+      
+      // Reset renderer ready state
+      setRendererReady(false);
     };
-  }, [renderTargetBlueprint]);
+  }, [renderTargetBlueprint, isMobile, isMounted]); // Add dependencies
 
-  // Drag and drop logic (optimized for mobile)
+  // Separate useEffect for drag and drop logic (after renderer is ready)
   useEffect(() => {
+    // Wait for renderer to be initialized
+    if (!rendererRef.current || !rendererRef.current.domElement) {
+      return;
+    }
+    
     const renderer = rendererRef.current;
     const camera = cameraRef.current;
     const raycaster = raycasterRef.current;
@@ -409,11 +517,9 @@ export default function BuildChallenge() {
     const intersectionPoint = new THREE.Vector3();
     const offset = new THREE.Vector3();
     
-    const isMobile = window.innerWidth <= 768;
     let isDragging = false;
 
     const onPointerDown = (event) => {
-      // Prevent default to avoid context menus and unwanted behaviors
       event.preventDefault();
       event.stopPropagation();
       
@@ -431,24 +537,18 @@ export default function BuildChallenge() {
       const intersects = raycaster.intersectObjects(draggableObjectsRef.current, false);
       
       if (intersects.length > 0) {
-        // Object is clicked - start dragging
         isDragging = true;
-        controls.enabled = false; // DISABLE camera controls when dragging object
+        controls.enabled = false;
         draggedObjectRef.current = intersects[0].object;
         
-        console.log('Object clicked:', draggedObjectRef.current.userData.type); // Debug log
-        
-        // Add visual feedback - brighten the object
         draggedObjectRef.current.material.emissive.setHex(0x222222);
         
-        // Show info of clicked object
         const info = getObjectCalculations(draggedObjectRef.current);
         setSelectedObjectInfo({
           type: draggedObjectRef.current.userData.type,
           ...info
         });
         
-        // Set the drag plane perpendicular to camera view for 3D movement
         const cameraDirection = new THREE.Vector3();
         camera.getWorldDirection(cameraDirection);
         dragPlane.setFromNormalAndCoplanarPoint(cameraDirection, draggedObjectRef.current.position);
@@ -457,7 +557,6 @@ export default function BuildChallenge() {
           offset.copy(intersectionPoint).sub(draggedObjectRef.current.position);
         }
       } else {
-        // No object clicked - allow camera movement
         setSelectedObjectInfo(null);
         controls.enabled = true;
         isDragging = false;
@@ -468,7 +567,6 @@ export default function BuildChallenge() {
     const onPointerMove = (event) => {
       if (!draggedObjectRef.current || !isDragging) return;
 
-      // Prevent default to avoid unwanted behaviors
       event.preventDefault();
       event.stopPropagation();
       
@@ -487,13 +585,12 @@ export default function BuildChallenge() {
       if (raycaster.ray.intersectPlane(dragPlane, newPosition)) {
         newPosition.sub(offset);
         
-        // Batasi pergerakan dalam 3D space dengan collision detection
-        const wallBoundary = 14; // Sedikit lebih kecil dari dinding (15)
+        const wallBoundary = 14;
         newPosition.x = Math.max(-wallBoundary, Math.min(wallBoundary, newPosition.x));
-        newPosition.y = Math.max(0.3, Math.min(8, newPosition.y)); // Tidak bisa masuk ke ground, tidak terlalu tinggi
+        newPosition.y = Math.max(0.3, Math.min(8, newPosition.y));
         newPosition.z = Math.max(-wallBoundary, Math.min(wallBoundary, newPosition.z));
         
-        const snapTolerance = 1.0; // Increased tolerance for easier snapping
+        const snapTolerance = 1.0;
         const blueprint = levelBlueprint.blueprint;
         
         let snapped = false;
@@ -517,51 +614,25 @@ export default function BuildChallenge() {
     
     const onPointerUp = (event) => {
       if (isDragging && draggedObjectRef.current) {
-        // Remove visual feedback
         draggedObjectRef.current.material.emissive.setHex(0x000000);
-        
-        // Object was being dragged - stop dragging and re-enable controls
         isDragging = false;
         draggedObjectRef.current = null;
       }
       
-      // Always re-enable controls after pointer up
       controls.enabled = true;
     };
     
+    // Check if renderer exists before accessing domElement
+    if (!renderer || !renderer.domElement) return;
+    
     const domElement = renderer.domElement;
     
-    // Mouse events for desktop
+    // Mouse events
     domElement.addEventListener('mousedown', onPointerDown, false);
     domElement.addEventListener('mousemove', onPointerMove, false);
     domElement.addEventListener('mouseup', onPointerUp, false);
     
-    // Add hover effect for better UX
-    const onMouseHover = (event) => {
-      if (isDragging) return;
-      
-      const rect = domElement.getBoundingClientRect();
-      pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-      pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-      
-      raycaster.setFromCamera(pointer, camera);
-      const intersects = raycaster.intersectObjects(draggableObjectsRef.current, false);
-      
-      if (intersects.length > 0) {
-        domElement.style.cursor = 'pointer';
-      } else {
-        domElement.style.cursor = 'default';
-      }
-    };
-    
-    domElement.addEventListener('mousemove', onMouseHover, false);
-    
-    // Pointer events as backup
-    domElement.addEventListener('pointerdown', onPointerDown, false);
-    domElement.addEventListener('pointermove', onPointerMove, false);
-    domElement.addEventListener('pointerup', onPointerUp, false);
-    
-    // Touch events for mobile
+    // Touch events
     const onTouchStart = (event) => {
       if (event.touches.length > 1) { 
         controls.enabled = true; 
@@ -597,23 +668,17 @@ export default function BuildChallenge() {
     domElement.addEventListener('touchend', onTouchEnd, false);
     
     return () => {
-      // Mouse events
-      domElement.removeEventListener('mousedown', onPointerDown);
-      domElement.removeEventListener('mousemove', onPointerMove);
-      domElement.removeEventListener('mouseup', onPointerUp);
-      domElement.removeEventListener('mousemove', onMouseHover);
-      
-      // Pointer events
-      domElement.removeEventListener('pointerdown', onPointerDown);
-      domElement.removeEventListener('pointermove', onPointerMove);
-      domElement.removeEventListener('pointerup', onPointerUp);
-      
-      // Touch events
-      domElement.removeEventListener('touchstart', onTouchStart);
-      domElement.removeEventListener('touchmove', onTouchMove);
-      domElement.removeEventListener('touchend', onTouchEnd);
+      // Safe cleanup - check if domElement still exists
+      if (domElement && domElement.removeEventListener) {
+        domElement.removeEventListener('mousedown', onPointerDown);
+        domElement.removeEventListener('mousemove', onPointerMove);
+        domElement.removeEventListener('mouseup', onPointerUp);
+        domElement.removeEventListener('touchstart', onTouchStart);
+        domElement.removeEventListener('touchmove', onTouchMove);
+        domElement.removeEventListener('touchend', onTouchEnd);
+      }
     };
-  }, [getObjectCalculations]);
+  }, [getObjectCalculations, rendererReady]); // Wait for renderer to be ready
 
   // Helper function untuk generate random spawn point dekat ghost
   const getRandomSpawnPosition = useCallback((targetType) => {
@@ -622,7 +687,9 @@ export default function BuildChallenge() {
     
     if (!targetItem) {
       // Fallback ke posisi default jika tidak ada target
-      return targetType === 'cube' ? { x: 2, y: 0.6, z: 2 } : { x: -2, y: 1.8, z: 2 };
+      return targetType === 'cone_waffle' ? { x: 2, y: 0.6, z: 2 } 
+           : targetType === 'cone_cream_large' ? { x: -2, y: 1.2, z: 2 }
+           : { x: 0, y: 1.8, z: 2 };
     }
     
     // Ghost position sebagai center point
@@ -647,7 +714,9 @@ export default function BuildChallenge() {
     const clampedZ = Math.max(-wallBoundary, Math.min(wallBoundary, randomZ));
     
     // Y position disesuaikan dengan type object
-    const spawnY = targetType === 'cube' ? 0.6 : 1.8;
+    const spawnY = targetType === 'cone_waffle' ? 0.6 
+                  : targetType === 'cone_cream_large' ? 1.2 
+                  : 1.8;
     
     return {
       x: clampedX,
@@ -656,37 +725,53 @@ export default function BuildChallenge() {
     };
   }, [selectedSize]);
 
-  // Add cube function
-  const addCube = useCallback(() => {
-    if (placedObjectCounts.cube < levelBlueprint.limits.cube) {
-      const mesh = createMesh('cube', 0x6366F1, selectedSize); // Modern indigo color
-      const spawnPos = getRandomSpawnPosition('cube');
+  // Add waffle cone function
+  const addConeWaffle = useCallback(() => {
+    if (placedObjectCounts.cone_waffle < levelBlueprint.limits.cone_waffle) {
+      const mesh = createMesh('cone_waffle', 0x8B4513, selectedSize); // Dark brown color for waffle cone
+      const spawnPos = getRandomSpawnPosition('cone_waffle');
       mesh.position.set(spawnPos.x, spawnPos.y, spawnPos.z);
       sceneRef.current.add(mesh);
       draggableObjectsRef.current.push(mesh);
-      setPlacedObjectCounts(prev => ({ ...prev, cube: prev.cube + 1 }));
+      setPlacedObjectCounts(prev => ({ ...prev, cone_waffle: prev.cone_waffle + 1 }));
       setAnalysisResult(null);
-      setCompletionMessage("Kubus ditambahkan. Coba letakkan!");
+      setCompletionMessage("Waffle cone ditambahkan. Coba letakkan!");
     } else {
-      setCompletionMessage("Anda sudah mencapai batas kubus untuk level ini.");
+      setCompletionMessage("Anda sudah mencapai batas waffle cone untuk level ini.");
     }
-  }, [selectedSize, placedObjectCounts, getRandomSpawnPosition]);
+  }, [selectedSize, placedObjectCounts, getRandomSpawnPosition, createMesh]); // Add createMesh dependency
 
-  // Add prism function
-  const addPrism = useCallback(() => {
-    if (placedObjectCounts.prism < levelBlueprint.limits.prism) {
-      const mesh = createMesh('prism', 0xF59E0B, selectedSize); // Modern amber color
-      const spawnPos = getRandomSpawnPosition('prism');
+  // Add large ice cream sphere function
+  const addSphereLarge = useCallback(() => {
+    if (placedObjectCounts.sphere_cream_large < levelBlueprint.limits.sphere_cream_large) {
+      const mesh = createMesh('sphere_cream_large', 0xE6F3FF, selectedSize); // Vanilla ice cream color
+      const spawnPos = getRandomSpawnPosition('sphere_cream_large');
       mesh.position.set(spawnPos.x, spawnPos.y, spawnPos.z);
       sceneRef.current.add(mesh);
       draggableObjectsRef.current.push(mesh);
-      setPlacedObjectCounts(prev => ({ ...prev, prism: prev.prism + 1 }));
+      setPlacedObjectCounts(prev => ({ ...prev, sphere_cream_large: prev.sphere_cream_large + 1 }));
       setAnalysisResult(null);
-      setCompletionMessage("Prisma ditambahkan. Coba letakkan!");
+      setCompletionMessage("Es krim vanilla besar ditambahkan. Coba letakkan!");
     } else {
-      setCompletionMessage("Anda sudah mencapai batas prisma untuk level ini.");
+      setCompletionMessage("Anda sudah mencapai batas es krim vanilla besar untuk level ini.");
     }
-  }, [selectedSize, placedObjectCounts, getRandomSpawnPosition]);
+  }, [selectedSize, placedObjectCounts, getRandomSpawnPosition, createMesh]);
+
+  // Add small ice cream sphere function
+  const addSphereSmall = useCallback(() => {
+    if (placedObjectCounts.sphere_cream_small < levelBlueprint.limits.sphere_cream_small) {
+      const mesh = createMesh('sphere_cream_small', 0xFFCCE5, selectedSize); // Strawberry ice cream color
+      const spawnPos = getRandomSpawnPosition('sphere_cream_small');
+      mesh.position.set(spawnPos.x, spawnPos.y, spawnPos.z);
+      sceneRef.current.add(mesh);
+      draggableObjectsRef.current.push(mesh);
+      setPlacedObjectCounts(prev => ({ ...prev, sphere_cream_small: prev.sphere_cream_small + 1 }));
+      setAnalysisResult(null);
+      setCompletionMessage("Es krim strawberry kecil ditambahkan. Coba letakkan!");
+    } else {
+      setCompletionMessage("Anda sudah mencapai batas es krim strawberry kecil untuk level ini.");
+    }
+  }, [selectedSize, placedObjectCounts, getRandomSpawnPosition, createMesh]);
   
   // Check if the level is completed
   const checkCompletion = useCallback(() => {
@@ -708,7 +793,7 @@ export default function BuildChallenge() {
 
       if (studentItem) {
           const dist = studentItem.position.distanceTo(ghostObject.position);
-          const scaleMatch = studentItem.scale.equals(ghostObject.scale);
+          const scaleMatch = studentItem.userData.scale === ghostObject.userData.scale;
           
           if (dist < tolerance && scaleMatch) {
               correctCount++;
@@ -717,12 +802,12 @@ export default function BuildChallenge() {
     });
 
     if (correctCount === blueprint.length) {
-      setCompletionMessage('🎉 Selamat! Bangunan Anda sudah benar!');
+      setCompletionMessage('🎉 Selamat! Es krim Anda sudah benar!');
       setIsLevelComplete(true);
       
       // Save completion to localStorage
       const completedChallenges = JSON.parse(localStorage.getItem('completedChallenges') || '[]');
-      const challengeId = 'rumah-sederhana'; // ID untuk challenge ini
+      const challengeId = 'es-krim-sederhana'; // ID untuk challenge es krim
       if (!completedChallenges.includes(challengeId)) {
         completedChallenges.push(challengeId);
         localStorage.setItem('completedChallenges', JSON.stringify(completedChallenges));
@@ -731,7 +816,7 @@ export default function BuildChallenge() {
       // Save build result for Learn Result page
       const buildResult = {
         challengeId: challengeId,
-        challengeName: 'Rumah Sederhana',
+        challengeName: 'Es Krim Sederhana',
         completedAt: new Date().toISOString(),
         objects: studentObjects.map(obj => ({
           type: obj.userData.type,
@@ -740,7 +825,7 @@ export default function BuildChallenge() {
       };
       localStorage.setItem('lastBuildResult', JSON.stringify(buildResult));
     } else {
-      setCompletionMessage(`Bangunan Anda belum sepenuhnya benar. ${correctCount} dari ${blueprint.length} objek sudah di posisi yang benar.`);
+      setCompletionMessage(`Es krim Anda belum sepenuhnya benar. ${correctCount} dari ${blueprint.length} objek sudah di posisi yang benar.`);
       setIsLevelComplete(false);
     }
   }, []);
@@ -761,19 +846,23 @@ export default function BuildChallenge() {
     });
     
     draggableObjectsRef.current = [];
-    setPlacedObjectCounts({ cube: 0, prism: 0 });
+    setPlacedObjectCounts({ cone_waffle: 0, sphere_cream_large: 0, sphere_cream_small: 0 });
     setCompletionMessage('Scene direset. Silakan mulai kembali.');
     setIsLevelComplete(false);
     setAnalysisResult(null);
     setSelectedObjectInfo(null);
     
     // Force garbage collection on mobile
-    if (window.innerWidth <= 768 && window.gc) {
-      setTimeout(() => window.gc(), 100);
+    if (isMobile && typeof window !== 'undefined' && window.gc) {
+      setTimeout(() => {
+        if (typeof window !== 'undefined' && window.gc) {
+          window.gc();
+        }
+      }, 100);
     }
     
     renderTargetBlueprint();
-  }, [renderTargetBlueprint]);
+  }, [renderTargetBlueprint, isMobile]);
 
   // Analyze the total building
   const analyzeBuilding = useCallback(() => {
@@ -799,14 +888,26 @@ export default function BuildChallenge() {
     });
 
     setAnalysisResult({ totalVolume: totalVolume.toFixed(2), totalSurfaceArea: totalSurfaceArea.toFixed(2), breakdown });
-    setCompletionMessage("Analisis bangunan selesai.");
+    setCompletionMessage("Analisis es krim selesai.");
     setShowAnalysis(true);
   }, [getObjectCalculations]);
 
   // Navigate to Learn Result page
   const goToLearnResult = useCallback(() => {
-    router.push('/learn-result');
-  }, [router]);
+    // Save build result to localStorage for learn result page
+    const buildResult = {
+      challengeType: 'ice-cream',
+      completed: true,
+      completedAt: new Date().toISOString(),
+      objects: [
+        { type: 'cone_waffle', count: placedObjectCounts.cone_waffle },
+        { type: 'sphere_cream_large', count: placedObjectCounts.cone_cream_large },
+        { type: 'sphere_cream_small', count: placedObjectCounts.cone_cream_small }
+      ]
+    };
+    localStorage.setItem('lastBuildResult', JSON.stringify(buildResult));
+    router.push('/learn-result/ice');
+  }, [router, placedObjectCounts]);
 
   // Render ulang cetak biru saat level atau skala berubah
   useEffect(() => {
@@ -844,7 +945,7 @@ export default function BuildChallenge() {
         {/* Title */}
         <div className="text-center">
           <h1 className="text-2xl font-bold text-white mb-2">Build Challenge</h1>
-          <p className="text-purple-100">Bentuk rumah sesuai contoh gambar</p>
+          <p className="text-purple-100">Bentuk es krim berlayer sesuai contoh gambar</p>
         </div>
 
         {/* Target Example */}
@@ -858,38 +959,55 @@ export default function BuildChallenge() {
           
           <div className="bg-gradient-to-b from-blue-50 to-blue-100 border-2 border-dashed border-blue-300 rounded-xl p-6 min-h-[160px] flex items-center justify-center">
             <div className="text-center">
-              {/* Rumah 2D Simple & Clean */}
-              <div className="relative mx-auto mb-4" style={{ width: '80px', height: '80px' }}>
-                {/* Balok untuk badan rumah */}
+              {/* Es Krim Modern dengan Sphere 2D */}
+              <div className="relative mx-auto mb-4" style={{ width: '80px', height: '120px' }}>
+                {/* Strawberry ice cream sphere (atas) */}
                 <div 
-                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2 rounded-md border-2"
+                  className="absolute top-0 left-1/2 transform -translate-x-1/2 rounded-full"
                   style={{
-                    width: '60px',
-                    height: '40px',
-                    backgroundColor: '#6366F1',
-                    borderColor: '#4F46E5',
-                    boxShadow: '0 2px 4px rgba(99, 102, 241, 0.2)'
+                    width: '36px',
+                    height: '36px',
+                    backgroundColor: '#FFE4E1',
+                    border: '2px solid #FFB6C1',
+                    boxShadow: '0 4px 8px rgba(255, 182, 193, 0.4), inset -4px -4px 8px rgba(255, 182, 193, 0.3)'
                   }}
                 />
                 
-                {/* Atap segitiga */}
+                {/* Vanilla ice cream sphere (tengah) */}
                 <div 
-                  className="absolute top-0 left-1/2 transform -translate-x-1/2"
+                  className="absolute top-8 left-1/2 transform -translate-x-1/2 rounded-full"
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    backgroundColor: '#F0F8FF',
+                    border: '2px solid #E6F3FF',
+                    boxShadow: '0 4px 8px rgba(230, 243, 255, 0.4), inset -4px -4px 8px rgba(230, 243, 255, 0.3)'
+                  }}
+                />
+                
+                {/* Waffle cone (bawah, terbalik) */}
+                <div 
+                  className="absolute bottom-0 left-1/2 transform -translate-x-1/2"
                   style={{
                     width: '0px',
                     height: '0px',
-                    borderLeft: '32px solid transparent',
-                    borderRight: '32px solid transparent',
-                    borderBottom: '35px solid #F59E0B',
-                    filter: 'drop-shadow(0 2px 4px rgba(245, 158, 11, 0.2))'
+                    borderLeft: '25px solid transparent',
+                    borderRight: '25px solid transparent',
+                    borderTop: '45px solid #8B4513',
+                    filter: 'drop-shadow(0 3px 6px rgba(139, 69, 19, 0.4))'
                   }}
                 />
+                
+                {/* Decorative elements */}
+                <div className="absolute top-1 left-1/2 transform -translate-x-1/2">
+                  <div className="text-xs">🍓</div>
+                </div>
               </div>
               
               <div className="space-y-2">
-                <h3 className="font-semibold text-gray-800 text-sm">Rumah Sederhana</h3>
+                <h3 className="font-semibold text-gray-800 text-sm">Es Krim Modern</h3>
                 <p className="text-xs text-gray-600 leading-relaxed">
-                  Susun <span className="font-medium text-indigo-600">balok biru</span> dan <span className="font-medium text-amber-600">prisma kuning</span> menjadi rumah
+                  Susun <span className="font-medium text-amber-700">waffle cone</span>, <span className="font-medium text-blue-500">vanilla sphere</span>, dan <span className="font-medium text-pink-500">strawberry sphere</span> menjadi es krim berlayer
                 </p>
               </div>
             </div>
@@ -905,37 +1023,53 @@ export default function BuildChallenge() {
             <h2 className="font-semibold text-gray-800">Bangun Ruang Tersedia</h2>
           </div>
           
-          <div className="grid grid-cols-2 gap-6 max-w-xs mx-auto">
+          <div className="grid grid-cols-3 gap-4 max-w-sm mx-auto">
             <div className="text-center">
               <div className="flex justify-center">
                 <div className="ml-2">
                   <ShapeButton
-                    type="cube"
-                    label="Balok"
-                    onClick={addCube}
-                    disabled={placedObjectCounts.cube >= levelBlueprint.limits.cube}
-                    bgColor="bg-indigo-500"
-                    icon="⬜"
+                    type="cone_waffle"
+                    label="Waffle"
+                    onClick={addConeWaffle}
+                    disabled={placedObjectCounts.cone_waffle >= levelBlueprint.limits.cone_waffle}
+                    bgColor="bg-orange-600"
+                    icon="🧇"
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-600 mt-2 leading-tight">Badan Rumah</p>
+              <p className="text-xs text-gray-600 mt-2 leading-tight">Cone Waffle</p>
             </div>
             
             <div className="text-center">
               <div className="flex justify-center">
                 <div className="ml-2">
                   <ShapeButton
-                    type="prism"
-                    label="Prisma"
-                    onClick={addPrism}
-                    disabled={placedObjectCounts.prism >= levelBlueprint.limits.prism}
-                    bgColor="bg-amber-500"
-                    icon="🔺"
+                    type="sphere_cream_large"
+                    label="Vanilla"
+                    onClick={addSphereLarge}
+                    disabled={placedObjectCounts.sphere_cream_large >= levelBlueprint.limits.sphere_cream_large}
+                    bgColor="bg-blue-200"
+                    icon="�"
                   />
                 </div>
               </div>
-              <p className="text-xs text-gray-600 mt-2 leading-tight">Atap Rumah</p>
+              <p className="text-xs text-gray-600 mt-2 leading-tight">Es Krim Vanilla</p>
+            </div>
+            
+            <div className="text-center">
+              <div className="flex justify-center">
+                <div className="ml-2">
+                  <ShapeButton
+                    type="sphere_cream_small"
+                    label="Strawberry"
+                    onClick={addSphereSmall}
+                    disabled={placedObjectCounts.sphere_cream_small >= levelBlueprint.limits.sphere_cream_small}
+                    bgColor="bg-pink-300"
+                    icon="🍓"
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-gray-600 mt-2 leading-tight">Es Krim Strawberry</p>
             </div>
           </div>
           
@@ -945,14 +1079,14 @@ export default function BuildChallenge() {
             <div className="grid grid-cols-4 gap-3">
               <div className="text-center">
                 <ShapeButton
-                  type="pyramid"
-                  label="Limas"
-                  onClick={() => setCompletionMessage("Limas belum tersedia di level ini")}
+                  type="cube"
+                  label="Balok"
+                  onClick={() => setCompletionMessage("Balok belum tersedia di level ini")}
                   disabled={true}
                   bgColor="bg-gray-400"
-                  icon="🔻"
+                  icon="⬜"
                 />
-                <p className="text-xs text-gray-500 mt-1 leading-tight">Limas</p>
+                <p className="text-xs text-gray-500 mt-1 leading-tight">Balok</p>
               </div>
 
               <div className="text-center">
@@ -969,14 +1103,14 @@ export default function BuildChallenge() {
 
               <div className="text-center">
                 <ShapeButton
-                  type="cone"
-                  label="Kerucut"
-                  onClick={() => setCompletionMessage("Kerucut belum tersedia di level ini")}
+                  type="pyramid"
+                  label="Limas"
+                  onClick={() => setCompletionMessage("Limas belum tersedia di level ini")}
                   disabled={true}
                   bgColor="bg-gray-400"
-                  icon="🔴"
+                  icon="🔻"
                 />
-                <p className="text-xs text-gray-500 mt-1 leading-tight">Kerucut</p>
+                <p className="text-xs text-gray-500 mt-1 leading-tight">Limas</p>
               </div>
               
               <div className="text-center">
@@ -997,7 +1131,7 @@ export default function BuildChallenge() {
         {/* Construction Area */}
         <div className="bg-white rounded-2xl p-4 shadow-lg">
           <div className="flex items-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+            <div className="w-6 h-6 bg-pink-500 rounded-full flex items-center justify-center">
               <span className="text-white text-sm">🏗️</span>
             </div>
             <h2 className="font-semibold text-gray-800">Area Konstruksi</h2>
@@ -1007,7 +1141,7 @@ export default function BuildChallenge() {
             <Suspense fallback={
               <div className="h-64 md:h-80 flex items-center justify-center text-gray-500">
                 <div className="text-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-2"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
                   <p>Memuat scene 3D...</p>
                 </div>
               </div>
@@ -1020,7 +1154,7 @@ export default function BuildChallenge() {
             <p className="text-sm text-gray-600 mb-2">{completionMessage}</p>
             
             {/* Performance Toggle for Mobile */}
-            {window.innerWidth <= 768 && (
+            {isMounted && isMobile && (
               <div className="mb-3">
                 <label className="flex items-center justify-center space-x-2 text-xs text-gray-600">
                   <input
@@ -1038,13 +1172,13 @@ export default function BuildChallenge() {
             <div className="flex space-x-2 justify-center flex-wrap">
               <button
                 onClick={checkCompletion}
-                className="px-3 py-2 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700 transition-colors mb-1"
+                className="px-3 py-2 bg-red-600 text-white rounded-lg text-xs hover:bg-red-700 transition-colors mb-1"
               >
                 Periksa
               </button>
               <button
                 onClick={analyzeBuilding}
-                className="px-3 py-2 bg-blue-600 text-white rounded-lg text-xs hover:bg-blue-700 transition-colors mb-1"
+                className="px-3 py-2 bg-purple-600 text-white rounded-lg text-xs hover:bg-purple-700 transition-colors mb-1"
               >
                 Analisis
               </button>
@@ -1064,10 +1198,10 @@ export default function BuildChallenge() {
           className={`w-full py-4 rounded-2xl font-bold text-lg shadow-lg transition-all
             ${isLevelComplete 
               ? 'bg-gradient-to-r from-green-400 to-green-600 text-white' 
-              : 'bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:from-purple-700 hover:to-blue-700'
+              : 'bg-gradient-to-r from-red-600 to-purple-600 text-white hover:from-red-700 hover:to-purple-700'
             }`}
         >
-          {isLevelComplete ? '✅ Selesai' : '🔥 Selesai'}
+          {isLevelComplete ? '✅ Selesai' : '🍦 Selesai'}
         </button>
       </div>
 
@@ -1076,7 +1210,7 @@ export default function BuildChallenge() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-96 overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold">Analisis Bangunan</h3>
+              <h3 className="text-lg font-bold">Analisis Es Krim</h3>
               <button 
                 onClick={() => setShowAnalysis(false)}
                 className="text-gray-500 hover:text-gray-700 text-xl"
@@ -1086,7 +1220,7 @@ export default function BuildChallenge() {
             </div>
             
             <div className="space-y-3">
-              <div className="bg-blue-50 p-3 rounded-lg">
+              <div className="bg-red-50 p-3 rounded-lg">
                 <p className="text-sm font-medium text-gray-700">Total Volume: {analysisResult.totalVolume}</p>
                 <p className="text-sm font-medium text-gray-700">Total Luas Permukaan: {analysisResult.totalSurfaceArea}</p>
               </div>
@@ -1095,7 +1229,11 @@ export default function BuildChallenge() {
                 <h4 className="font-medium mb-2">Detail Objek:</h4>
                 {analysisResult.breakdown.map(item => (
                   <div key={item.id} className="bg-gray-50 p-2 rounded mb-2">
-                    <p className="text-sm font-medium capitalize">{item.type} #{item.id}</p>
+                    <p className="text-sm font-medium capitalize">
+                      {item.type === 'cone_waffle' ? 'Waffle Cone' 
+                       : item.type === 'sphere_cream_large' ? 'Es Krim Vanilla (Besar)' 
+                       : 'Es Krim Strawberry (Kecil)'} #{item.id}
+                    </p>
                     <p className="text-xs text-gray-600">Volume: {item.volume}, Luas Permukaan: {item.surfaceArea}</p>
                   </div>
                 ))}

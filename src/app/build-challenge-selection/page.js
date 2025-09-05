@@ -28,6 +28,19 @@ export default function BuildChallengeSelection() {
 
   const challenges = [
     {
+      id: 'es-krim-sederhana',
+      title: 'Es Krim Cone',
+      subtitle: '5 menit • 2 bentuk',
+      difficulty: 'MUDAH',
+      description: 'Buat es krim dengan tabung sebagai cone dan kerucut di atasnya sebagai es krim.',
+      shapes: ['Tabung', 'Kerucut'],
+      image: '🍦',
+      color: 'from-pink-400 to-yellow-400',
+      score: null,
+      estimatedTime: '5 menit',
+      route: '/build-challenge-ice-cream'
+    },
+    {
       id: 'rumah-sederhana',
       title: 'Rumah Sederhana',
       subtitle: '5 menit • 2 bentuk',
@@ -37,7 +50,21 @@ export default function BuildChallengeSelection() {
       image: '🏠',
       color: 'from-red-400 to-pink-400',
       score: 100,
-      estimatedTime: '5 menit'
+      estimatedTime: '5 menit',
+      route: '/build-challenge'
+    },
+    {
+      id: 'manusia-salju',
+      title: 'Manusia Salju',
+      subtitle: '7 menit • 3 bentuk',
+      difficulty: 'MUDAH',
+      description: 'Susun tiga bola bertumpuk (besar, sedang, kecil) untuk membangun manusia salju.',
+      shapes: ['Bola', 'Bola', 'Bola'],
+      image: '⛄',
+      color: 'from-blue-300 to-white',
+      score: null,
+      estimatedTime: '7 menit',
+      route: '#'
     },
     {
       id: 'kastil-megah',
@@ -49,55 +76,60 @@ export default function BuildChallengeSelection() {
       image: '🏰',
       color: 'from-purple-400 to-blue-400',
       score: null,
-      estimatedTime: '10 menit'
+      estimatedTime: '10 menit',
+      route: '#'
     },
     {
-      id: 'jembatan-kuat',
-      title: 'Jembatan Kuat',
-      subtitle: '7 menit • 3 bentuk',
-      difficulty: 'MUDAH',
-      description: 'Konstruksi jembatan sederhana dengan pilar penyangga dan lantai jembatan',
-      shapes: ['Balok', 'Kubus'],
-      image: '🌉',
-      color: 'from-green-400 to-teal-400',
-      score: 95,
-      estimatedTime: '7 menit'
-    },
-    {
-      id: 'roket-luar-angkasa',
-      title: 'Roket Luar Angkasa',
-      subtitle: '12 menit • 3 bentuk',
+      id: 'roket-sederhana',
+      title: 'Roket Sederhana',
+      subtitle: '10 menit • 3 bentuk',
       difficulty: 'SEDANG',
-      description: 'Rakit roket dengan badan silinder dan kerucut untuk bagian atas',
-      shapes: ['Balok', 'Kerucut', 'Bola'],
+      description: 'Bangun roket sederhana dengan tabung sebagai badan, kerucut di bagian atas, dan bola di bawah.',
+      shapes: ['Tabung', 'Kerucut', 'Bola'],
       image: '🚀',
       color: 'from-orange-400 to-red-400',
       score: null,
-      estimatedTime: '12 menit'
+      estimatedTime: '10 menit',
+      route: '#'
     },
     {
-      id: 'menara-tinggi',
-      title: 'Menara Tinggi',
-      subtitle: '15 menit • 4 bentuk',
-      difficulty: 'SULIT',
-      description: 'Bangun menara yang menjulang tinggi dengan berbagai elemen arsitektur',
-      shapes: ['Balok', 'Kubus', 'Prisma', 'Limas'],
-      image: '🗼',
-      color: 'from-yellow-400 to-orange-400',
+      id: 'menara-sirkus',
+      title: 'Menara Sirkus',
+      subtitle: '12 menit • 3 bentuk',
+      difficulty: 'SEDANG',
+      description: 'Rancang menara sirkus dengan tabung sebagai badan, kerucut di bagian atas, dan prisma sebagai hiasan.',
+      shapes: ['Tabung', 'Kerucut', 'Prisma'],
+      image: '🎪',
+      color: 'from-purple-400 to-pink-400',
       score: null,
-      estimatedTime: '15 menit'
+      estimatedTime: '12 menit',
+      route: '#'
     },
     {
-      id: 'kota-mini',
-      title: 'Kota Mini',
-      subtitle: '20 menit • 6 bentuk',
+      id: 'gedung-modern',
+      title: 'Gedung Modern',
+      subtitle: '15 menit • 3 bentuk',
+      difficulty: 'SULIT',
+      description: 'Bangun gedung modern dengan kubus sebagai dasar, tabung sebagai menara, dan limas sebagai atap.',
+      shapes: ['Kubus', 'Tabung', 'Limas'],
+      image: '🏢',
+      color: 'from-gray-400 to-blue-400',
+      score: null,
+      estimatedTime: '15 menit',
+      route: '#'
+    },
+    {
+      id: 'kota-fantasi',
+      title: 'Kota Fantasi',
+      subtitle: '20 menit • 5 bentuk',
       difficulty: 'TERHEBAT',
-      description: 'Bangun kota mini dengan berbagai bangunan dan struktur',
-      shapes: ['Balok', 'Kubus', 'Prisma', 'Limas'],
+      description: 'Gabungkan berbagai bangun ruang untuk membuat kota fantasi mini yang penuh variasi.',
+      shapes: ['Tabung', 'Bola', 'Kubus', 'Prisma', 'Limas'],
       image: '🏙️',
       color: 'from-blue-400 to-purple-400',
       score: null,
-      estimatedTime: '20 menit'
+      estimatedTime: '20 menit',
+      route: '#'
     }
   ];
 
@@ -125,16 +157,34 @@ export default function BuildChallengeSelection() {
       case 'Prisma': return 'bg-amber-100 text-amber-700';
       case 'Limas': return 'bg-red-100 text-red-700';
       case 'Kerucut': return 'bg-pink-100 text-pink-700';
+      case 'Tabung': return 'bg-orange-100 text-orange-700';
       case 'Bola': return 'bg-purple-100 text-purple-700';
       default: return 'bg-gray-100 text-gray-700';
     }
   };
 
+  const getLearnResultRoute = (challengeId) => {
+    switch (challengeId) {
+      case 'es-krim-sederhana': return '/learn-result/ice';
+      case 'rumah-sederhana': return '/learn-result';
+      default: return '/learn-result';
+    }
+  };
+
   const isCompleted = (challengeId) => completedChallenges.has(challengeId);
+
+  const isAvailable = (challengeId) => {
+    // Es krim dan rumah sederhana selalu tersedia sebagai challenge mudah
+    if (challengeId === 'es-krim-sederhana' || challengeId === 'rumah-sederhana') {
+      return true;
+    }
+    // Challenge lain tersedia setelah menyelesaikan minimal 1 challenge
+    return completedChallenges.size > 0;
+  };
 
   const ChallengeCard = ({ challenge }) => {
     const completed = isCompleted(challenge.id);
-    const available = challenge.id === 'rumah-sederhana' || completed || completedChallenges.size > 0;
+    const available = isAvailable(challenge.id);
     const quizResult = quizResults[challenge.id];
     const quizScore = quizResult ? quizResult.score : 0;
 
@@ -196,15 +246,25 @@ export default function BuildChallengeSelection() {
         </div>
 
         <div className="flex items-center justify-between">
-          {available ? (
-            <Link href={challenge.id === 'rumah-sederhana' ? '/build-challenge' : '#'}>
-              <button className={`${available && !completed ? 'text-blue-600' : completed ? 'text-green-600' : 'text-gray-400'} text-sm font-medium`}>
-                {completed && quizResult ? `Skor Kuis: ${quizScore}/50` : completed ? 'Kuis Belum Diselesaikan' : 'Belum Dimainkan'}
-              </button>
-            </Link>
-          ) : (
-            <span className="text-gray-400 text-sm">Belum tersedia</span>
-          )}
+          <div className="flex space-x-2">
+            {available && (
+              <Link href={challenge.route || '#'}>
+                <button className="text-blue-600 text-sm font-medium hover:text-blue-700">
+                  {completed ? 'Main Lagi' : 'Mulai'}
+                </button>
+              </Link>
+            )}
+            {completed && (
+              <Link href={getLearnResultRoute(challenge.id)}>
+                <button className="text-green-600 text-sm font-medium hover:text-green-700">
+                  {quizResult ? `Kuis (${quizResult.score}/50)` : 'Ambil Kuis'}
+                </button>
+              </Link>
+            )}
+            {!available && (
+              <span className="text-gray-400 text-sm">Belum tersedia</span>
+            )}
+          </div>
           <span className="text-gray-500 text-xs">{challenge.estimatedTime}</span>
         </div>
       </div>
