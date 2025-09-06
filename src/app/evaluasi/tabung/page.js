@@ -141,7 +141,7 @@ export default function EvaluasiTabung() {
       correct: [0, 1, 2], // 3 pernyataan benar, 1 salah (durasi ~7,5 hari bukan 8 hari)
       type: "multiple",
       hasImage: true,
-      imagePath: "/images/Soal_10.jpg",
+      imagePath: "/images/Soal_10.png",
       imageCaption: "Sumber gambar: MedanWow.id",
       explanation: "Volume = πr²t = 3,14 × 2² × 6 = 75,36 m³ = 75.360 liter. Kebutuhan per hari = 50 × 200 = 10.000 liter. Durasi = 75.360 ÷ 10.000 = 7,536 hari ≈ 7,5 hari (bukan 8 hari)."
     }
