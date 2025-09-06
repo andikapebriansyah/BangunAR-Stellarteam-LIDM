@@ -129,8 +129,9 @@ export default function SectionContent({ section, markAsCompleted }) {
     }, [section.id]);
 
     const handleArCompletion = () => {
-      setArCompleted(true);
-      localStorage.setItem(`ar-completed-${section.id}`, 'true');
+  setArCompleted(true);
+  localStorage.setItem(`ar-completed-${section.id}`, 'true');
+  markAsCompleted(section.id);
     };
 
     const handleLkpdCompletion = () => {
