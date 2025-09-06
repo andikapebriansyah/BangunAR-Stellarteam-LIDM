@@ -59,7 +59,13 @@ export default function SectionContent({ section, markAsCompleted }) {
                 <div className="mb-3">
                   <div className="w-full h-32 sm:h-36 lg:h-32 bg-gray-200 rounded-lg overflow-hidden">
                     <img 
-                      src={`/materi/tabung_examples/${example.name.toLowerCase().replace(/\s+/g, '_')}.jpg`}
+                      src={`/materi/tabung/${
+                        example.name === 'Kaleng Minuman' ? 'kaleng.png' :
+                        example.name === 'Silo Penyimpanan' ? 'silo.jpg' :
+                        example.name === 'Menara Air' ? 'menara-air.jpg' :
+                        example.name === 'Toples Kue' ? 'toples kue.jpg' :
+                        `${example.name.toLowerCase().replace(/\s+/g, '_')}.jpg`
+                      }`}
                       alt={example.name}
                       className="w-full h-full object-cover"
                       onError={(e) => {
@@ -198,18 +204,22 @@ export default function SectionContent({ section, markAsCompleted }) {
           
           {!arCompleted ? (
             <Link href="/ar/silinder">
-              <button className="bg-white text-purple-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition-colors">
+              <button 
+                onClick={handleArCompletion}
+                className="bg-white text-purple-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition-colors"
+              >
                 🥽 Buka AR Experience
               </button>
             </Link>
           ) : (
-            <button 
-              onClick={handleArCompletion}
-              className="bg-white text-green-600 px-6 py-3 rounded-xl font-medium"
-              disabled
-            >
-              ✅ AR Selesai - Lanjut ke LKPD
-            </button>
+            <div className="space-y-3">
+              <Link href="/ar/silinder">
+                <button className="bg-white text-green-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-100 transition-colors">
+                  🥽 Buka AR Experience (Sudah Selesai)
+                </button>
+              </Link>
+              <p className="text-green-100 text-sm">✅ AR Eksplorasi sudah diselesaikan!</p>
+            </div>
           )}
         </div>
 
