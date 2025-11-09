@@ -1,9 +1,11 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
+import { isDesktopDevice } from '@/utils/arDetector';
 
-export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData, onHotspotClick, selectedElement }) {
+export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData, onHotspotClick, selectedElement, onARStatusChange, shouldLaunchAR }) {
   const modelViewerRef = useRef();
   const [viewMode, setViewMode] = useState('default'); // default, top, front, side
+  const hasLaunchedRef = useRef(false);
 
   const viewModes = {
     default: { orbit: '45deg 75deg 3.5m', fov: '35deg', label: 'Default' },
@@ -12,6 +14,17 @@ export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData,
     side: { orbit: '90deg 75deg 3.5m', fov: '35deg', label: 'Side View' },
     close: { orbit: '45deg 75deg 2.5m', fov: '45deg', label: 'Close Up' }
   };
+
+  // Auto-launch AR when shouldLaunchAR becomes true
+  useEffect(() => {
+    if (shouldLaunchAR && !hasLaunchedRef.current) {
+      console.log('[ARViewer] Auto-launching AR...');
+      hasLaunchedRef.current = true;
+      handleARButtonClick();
+    } else if (!shouldLaunchAR) {
+      hasLaunchedRef.current = false;
+    }
+  }, [shouldLaunchAR]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -24,6 +37,45 @@ export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData,
       };
     }
   }, []);
+
+  // Listen to AR status changes from model-viewer
+  useEffect(() => {
+    const viewer = modelViewerRef.current;
+    if (!viewer) return;
+
+    const handleARStatus = (event) => {
+      const status = event.detail.status;
+      console.log('[ARViewer] 🔔 AR Status Event:', status, event.detail);
+      
+      if (onARStatusChange) {
+        onARStatusChange(status);
+      }
+    };
+
+    const handleARTracking = (event) => {
+      console.log('[ARViewer] 🎯 AR Tracking Event:', event.detail);
+    };
+
+    const handleError = (event) => {
+      console.error('[ARViewer] ❌ Model-Viewer Error:', event);
+    };
+
+    // Add event listeners
+    viewer.addEventListener('ar-status', handleARStatus);
+    viewer.addEventListener('ar-tracking', handleARTracking);
+    viewer.addEventListener('error', handleError);
+
+    // Log when viewer is ready
+    viewer.addEventListener('load', () => {
+      console.log('[ARViewer] ✅ Model loaded successfully');
+    });
+
+    return () => {
+      viewer.removeEventListener('ar-status', handleARStatus);
+      viewer.removeEventListener('ar-tracking', handleARTracking);
+      viewer.removeEventListener('error', handleError);
+    };
+  }, [onARStatusChange]);
 
   useEffect(() => {
     if (modelViewerRef.current) {
@@ -47,11 +99,75 @@ export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData,
 
 
 
-  // Handle AR button click
-  const handleARButtonClick = () => {
-    const arButton = document.getElementById('ar-button-trigger');
-    if (arButton) {
-      arButton.click();
+  // Handle AR button click with desktop detection and focus check
+  const handleARButtonClick = async () => {
+    console.log('[ARViewer] 🚀 Launch AR button clicked');
+    
+    // First check if device is desktop
+    if (isDesktopDevice()) {
+      console.warn('[ARViewer] ⚠️ Desktop/PC detected - AR Native not available on desktop');
+      console.log('[ARViewer] → Falling back to Pseudo-AR mode');
+      if (onARStatusChange) {
+        onARStatusChange('failed');
+      }
+      return;
+    }
+    
+    console.log('[ARViewer] 📱 Mobile device detected - checking AR availability...');
+    
+    const viewer = modelViewerRef.current;
+    
+    // Check if viewer supports AR
+    if (viewer && viewer.canActivateAR) {
+      console.log('[ARViewer] ✅ canActivateAR = true, attempting to activate...');
+      
+      // Track window focus to detect if AR actually launches
+      let windowLostFocus = false;
+      let focusCheckTimeout = null;
+      
+      const handleBlur = () => {
+        console.log('[ARViewer] 🔄 Window lost focus - AR may have launched');
+        windowLostFocus = true;
+      };
+      
+      window.addEventListener('blur', handleBlur);
+      
+      try {
+        await viewer.activateAR();
+        console.log('[ARViewer] ✅ activateAR() returned successfully');
+        
+        // Wait 1.5 seconds to check if window lost focus
+        focusCheckTimeout = setTimeout(() => {
+          window.removeEventListener('blur', handleBlur);
+          
+          if (windowLostFocus) {
+            console.log('[ARViewer] ✅ AR actually launched (window lost focus)');
+            if (onARStatusChange) {
+              onARStatusChange('session-started');
+            }
+          } else {
+            console.warn('[ARViewer] ⚠️ AR activation returned but window never lost focus');
+            console.warn('[ARViewer] → This means AR failed to launch (intent error or no AR app)');
+            console.log('[ARViewer] → Falling back to Pseudo-AR');
+            if (onARStatusChange) {
+              onARStatusChange('failed');
+            }
+          }
+        }, 1500);
+        
+      } catch (error) {
+        if (focusCheckTimeout) clearTimeout(focusCheckTimeout);
+        window.removeEventListener('blur', handleBlur);
+        console.error('[ARViewer] ❌ AR activation failed:', error.message, error);
+        if (onARStatusChange) {
+          onARStatusChange('failed');
+        }
+      }
+    } else {
+      console.error('[ARViewer] ❌ canActivateAR = false, AR not supported on this mobile device');
+      if (onARStatusChange) {
+        onARStatusChange('not-presenting');
+      }
     }
   };
 
@@ -59,29 +175,14 @@ export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData,
     <div className={`relative w-full h-full transition-all duration-500 ${
       isARActive ? 'transform scale-105 drop-shadow-2xl' : ''
     }`}>
-      {/* View Mode Toggle Button - positioned to avoid header */}
-      {!isARActive && (
-        <button
-          onClick={cycleViewMode}
-          className="absolute bottom-4 right-4 z-20 bg-white/10 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-2 shadow-lg"
-        >
-          <span className="text-sm">👁️</span>
-          <span className="text-xs font-medium">{viewModes[viewMode].label}</span>
-        </button>
-      )}
-
-      {/* AR Launch Button - positioned at bottom */}
-      {isARActive && (
-        <div className="absolute bottom-20 left-0 right-0 flex justify-center z-30 pointer-events-none">
-          <button
-            onClick={handleARButtonClick}
-            className="pointer-events-auto bg-green-500 hover:bg-green-600 active:bg-green-700 text-white font-bold py-4 px-8 rounded-full shadow-2xl flex items-center gap-3 animate-bounce"
-          >
-            <span className="text-2xl">📱</span>
-            <span>Launch AR</span>
-          </button>
-        </div>
-      )}
+      {/* View Mode Toggle Button - Always visible */}
+      <button
+        onClick={cycleViewMode}
+        className="absolute bottom-4 right-4 z-20 bg-white/10 backdrop-blur-md border border-white/30 text-white px-4 py-2 rounded-lg hover:bg-white/20 transition-all duration-300 flex items-center gap-2 shadow-lg"
+      >
+        <span className="text-sm">👁️</span>
+        <span className="text-xs font-medium">{viewModes[viewMode].label}</span>
+      </button>
 
       <model-viewer
         ref={modelViewerRef}
