@@ -21,7 +21,7 @@ export const chatbotData = {
     visualisasi: {
       keywords: ['visualisasi', 'visual', 'gambar', 'bentuk', 'lihat', 'tampilan'],
       shapes: {
-        tabung: "**🎨 Visualisasi Tabung:**\n\nBayangkan sebuah kaleng minuman:\n🔵 **Alas** (lingkaran di bawah)\n🔵 **Tutup** (lingkaran di atas)\n📜 **Selimut** (bagian samping melengkung)\n📏 **Tinggi** (jarak alas ke tutup)\n\n💡 **Ingat:** Tabung = 2 lingkaran + selimut melengkung\n\n📍 **Contoh dalam kehidupan:**\n• Kaleng minuman\n• Drum minyak\n• Pipa air\n• Toples kue",
+        tabung: "**🎨 Visualisasi Tabung:**\n\nBayangkan sebuah kaleng minuman:\n� **Alas** (lingkaran di bawah)\n🔵 **Tutup** (lingkaran di atas)\n� **Selimut** (bagian samping melengkung)\n📏 **Tinggi** (jarak alas ke tutup)\n\n💡 **Ingat:** Tabung = 2 lingkaran + selimut melengkung\n\n📍 **Contoh dalam kehidupan:**\n• Kaleng minuman\n• Drum minyak\n• Pipa air\n• Toples kue",
         kerucut: "**🎨 Visualisasi Kerucut:**\n\nSeperti topi ulang tahun:\n🔵 **Alas** (lingkaran di bawah)\n📍 **Puncak** (titik di atas)\n📜 **Selimut** (bidang miring melengkung)\n📏 **Tinggi** (jarak alas ke puncak)\n📐 **Garis Pelukis** (jarak puncak ke tepi alas)\n\n💡 **Ingat:** Kerucut = 1 lingkaran + 1 puncak\n\n📍 **Contoh dalam kehidupan:**\n• Topi ulang tahun\n• Cone es krim\n• Corong\n• Topi petani",
         bola: "**🎨 Visualisasi Bola:**\n\nSeperti bola sepak:\n🌐 **Permukaan melengkung sempurna**\n📍 **Titik pusat**\n📏 **Jari-jari** (jarak pusat ke permukaan)\n📐 **Diameter** (2 × jari-jari)\n\n💡 **Ingat:** Semua titik di permukaan berjarak sama dari pusat\n\n📍 **Contoh dalam kehidupan:**\n• Bola sepak\n• Bola basket\n• Kelereng\n• Planet Bumi"
       }
@@ -37,12 +37,12 @@ export const chatbotData = {
     perbandingan: {
       keywords: ['perbandingan', 'compare', 'banding', 'perbedaan', 'lebih besar', 'lebih kecil', 'vs'],
       content: {
-        text: "**📊 Perbandingan Bangun Ruang Lengkung:**\n\n**🎯 VOLUME (untuk r dan t yang sama):**\n\n• **Tabung:** V = πr²t\n• **Kerucut:** V = ⅓πr²t (= ⅓ volume tabung)\n• **Bola:** V = ⁴⁄₃πr³\n\n💡 **Fakta Menarik:**\nJika tinggi tabung = diameter bola (t = 2r):\n• Volume Bola = ⅔ Volume Tabung\n\n**📏 LUAS PERMUKAAN:**\n\n• **Tabung:** L = 2πr(r + t)\n• **Kerucut:** L = πr(r + s), s = √(r² + t²)\n• **Bola:** L = 4πr²\n\n**🔍 KARAKTERISTIK:**\n\n| Aspek | Tabung | Kerucut | Bola |\n|-------|--------|---------|------|\n| Alas | 2 lingkaran | 1 lingkaran | Tidak ada |\n| Puncak | Tidak ada | 1 titik | Tidak ada |\n| Rusuk | 2 lengkung | 1 lengkung | Tidak ada |\n| Simetri | Tinggi | Sedang | Sempurna |\n\n**💼 Aplikasi:**\n• **Tabung:** Kaleng, drum, pipa\n• **Kerucut:** Topi, corong, cone\n• **Bola:** Kelereng, planet, balon"
+        text: "**📊 Perbandingan Bangun Ruang Lengkung:**\n\n**🎯 VOLUME (untuk r dan t yang sama):**\n\n• **Tabung:** V = πr²t\n• **Kerucut:** V = ⅓πr²t (= ⅓ volume tabung)\n• **Bola:** V = ⁴⁄₃πr³\n\n� **Fakta Menarik:**\nJika tinggi tabung = diameter bola (t = 2r):\n• Volume Bola = ⅔ Volume Tabung\n\n**📏 LUAS PERMUKAAN:**\n\n• **Tabung:** L = 2πr(r + t)\n• **Kerucut:** L = πr(r + s), s = √(r² + t²)\n• **Bola:** L = 4πr²\n\n**🔍 KARAKTERISTIK:**\n\n| Aspek | Tabung | Kerucut | Bola |\n|-------|--------|---------|------|\n| Alas | 2 lingkaran | 1 lingkaran | Tidak ada |\n| Puncak | Tidak ada | 1 titik | Tidak ada |\n| Rusuk | 2 lengkung | 1 lengkung | Tidak ada |\n| Simetri | Tinggi | Sedang | Sempurna |\n\n**💼 Aplikasi:**\n• **Tabung:** Kaleng, drum, pipa\n• **Kerucut:** Topi, corong, cone\n• **Bola:** Kelereng, planet, balon"
       }
     },
 
     tantangan: {
-      keywords: ['tantangan', 'challenge', 'soal sulit', 'latihan', 'quiz', 'test', 'soal'],
+      keywords: ['tantangan', 'challenge', 'soal sulit', 'latihan', 'quiz', 'test'],
       levels: {
         mudah: {
           keywords: ['mudah', 'easy', 'gampang', 'pemula'],
@@ -52,7 +52,7 @@ export const chatbotData = {
               answer: "**Jawaban:** 1.540 cm³\n\n**Penyelesaian:**\nV = π × r² × t\nV = 22/7 × 7² × 10\nV = 22/7 × 49 × 10\nV = 22 × 7 × 10\nV = 1.540 cm³"
             },
             {
-              question: "**🎯 Tantangan Level MUDAH - Kerucut**\n\nSebuah cone es krim dengan jari-jari 3 cm dan tinggi 12 cm.\n\n**Pertanyaan:** Berapa volume es krim yang dapat ditampung?\n\n💡 **Hint:** Jangan lupa koefisien 1/3!",
+              question: "**🎯 Tantangan Level MUDAH - Kerucut**\n\nSebuah cone es krim dengan jari-jari 3 cm dan tinggi 12 cm.\n\n**Pertanyaan:** Berapa volume es krim yang dapat ditampung?\n\n� **Hint:** Jangan lupa koefisien 1/3!",
               answer: "**Jawaban:** 113,04 cm³\n\n**Penyelesaian:**\nV = ⅓ × π × r² × t\nV = ⅓ × 3,14 × 3² × 12\nV = ⅓ × 3,14 × 9 × 12\nV = ⅓ × 339,12\nV = 113,04 cm³"
             }
           ]
@@ -88,10 +88,26 @@ export const chatbotUtils = {
       .trim();
   },
 
+  calculateSimilarity: (text1, text2) => {
+    const words1 = text1.split(' ');
+    const words2 = text2.split(' ');
+    let matches = 0;
+    
+    words1.forEach(word1 => {
+      if (words2.some(word2 => 
+        word2.includes(word1) || word1.includes(word2)
+      )) {
+        matches++;
+      }
+    });
+    
+    return matches / Math.max(words1.length, words2.length);
+  },
+
   findBestMatch: (userInput) => {
     const normalizedInput = chatbotUtils.normalizeText(userInput);
     
-    // 1. Check GREETING
+    // Check if it's a greeting (simple check)
     const greetingWords = ['halo', 'hai', 'hello', 'hi', 'selamat', 'assalamu', 'salam', 'permisi', 'hei', 'hey'];
     const isGreeting = greetingWords.some(greeting => {
       const words = normalizedInput.split(' ');
@@ -106,8 +122,8 @@ export const chatbotUtils = {
       };
     }
 
-    // 2. Check HELP
-    const helpKeywords = chatbotData.help.keywords;
+    // Check help
+    const helpKeywords = ['bantuan', 'help', 'panduan', 'menu'];
     const isHelpRequest = helpKeywords.some(keyword => normalizedInput.includes(keyword));
     
     if (isHelpRequest) {
@@ -118,98 +134,59 @@ export const chatbotUtils = {
       };
     }
 
-    // 3. Check VISUALISASI
-    const visualKeywords = chatbotData.utilities.visualisasi.keywords;
-    const isVisual = visualKeywords.some(keyword => normalizedInput.includes(keyword));
-    
-    if (isVisual) {
-      // Detect shape
-      let shape = null;
-      if (normalizedInput.includes('tabung') || normalizedInput.includes('silinder')) shape = 'tabung';
-      else if (normalizedInput.includes('kerucut') || normalizedInput.includes('cone')) shape = 'kerucut';
-      else if (normalizedInput.includes('bola') || normalizedInput.includes('sphere')) shape = 'bola';
+    // Find best topic match - ONLY if subtopic is explicitly matched
+    let bestMatch = null;
+    let bestScore = 0;
+
+    Object.entries(chatbotData.topics).forEach(([topicKey, topic]) => {
+      // Check topic keywords
+      const hasTopicKeyword = topic.keywords.some(keyword => normalizedInput.includes(keyword));
       
-      if (shape) {
-        return {
-          type: 'visualisasi',
-          content: chatbotData.utilities.visualisasi.shapes[shape],
-          score: 1.0
-        };
+      if (hasTopicKeyword) {
+        // Check subtopics for SPECIFIC match
+        Object.entries(topic.subtopics).forEach(([subtopicKey, subtopic]) => {
+          subtopic.keywords.forEach(subKeyword => {
+            if (normalizedInput.includes(subKeyword)) {
+              const subScore = 1.0; // High score for exact subtopic match
+              if (subScore > bestScore) {
+                bestScore = subScore;
+                bestMatch = {
+                  type: 'subtopic',
+                  topic: topicKey,
+                  subtopic: subtopicKey
+                };
+              }
+            }
+          });
+        });
+        
+        // REMOVED: Generic topic match - let RAG handle it instead
+        // This prevents "pilih aspek yang ingin dipelajari" response
       }
-      
-      // No shape specified, show all
-      return {
-        type: 'visualisasi',
-        content: "**🎨 Visualisasi Bangun Ruang**\n\nPilih bangun ruang yang ingin dilihat:\n• Visualisasi tabung\n• Visualisasi kerucut\n• Visualisasi bola",
-        score: 1.0
-      };
-    }
+    });
 
-    // 4. Check TIPS
-    const tipsKeywords = chatbotData.utilities.tips.keywords;
-    const isTips = tipsKeywords.some(keyword => normalizedInput.includes(keyword));
-    
-    if (isTips) {
-      return {
-        type: 'tips',
-        content: chatbotData.utilities.tips.content.text,
-        score: 1.0
-      };
-    }
-
-    // 5. Check PERBANDINGAN
-    const compareKeywords = chatbotData.utilities.perbandingan.keywords;
-    const isCompare = compareKeywords.some(keyword => normalizedInput.includes(keyword));
-    
-    if (isCompare) {
-      return {
-        type: 'perbandingan',
-        content: chatbotData.utilities.perbandingan.content.text,
-        score: 1.0
-      };
-    }
-
-    // 6. Check TANTANGAN
-    const challengeKeywords = chatbotData.utilities.tantangan.keywords;
-    const isChallenge = challengeKeywords.some(keyword => normalizedInput.includes(keyword));
-    
-    if (isChallenge) {
-      // Detect level
-      let level = 'mudah'; // default
-      
-      const levelKeywords = chatbotData.utilities.tantangan.levels;
-      if (levelKeywords.sulit.keywords.some(kw => normalizedInput.includes(kw))) {
-        level = 'sulit';
-      } else if (levelKeywords.sedang.keywords.some(kw => normalizedInput.includes(kw))) {
-        level = 'sedang';
-      }
-      
-      const problems = chatbotData.utilities.tantangan.levels[level].problems;
-      const randomProblem = problems[Math.floor(Math.random() * problems.length)];
-      
-      return {
-        type: 'tantangan',
-        content: randomProblem.question + "\n\n" + randomProblem.answer,
-        score: 1.0
-      };
-    }
-
-    // 7. NO MATCH - Use RAG
     return {
-      type: 'fallback',
-      score: 0
+      match: bestMatch,
+      score: bestScore,
+      type: bestMatch ? bestMatch.type : 'fallback',
+      threshold: 0.8 // Higher threshold - only exact matches
     };
   },
 
   generateResponse: (matchResult) => {
-    const { type, content, score } = matchResult;
+    const { match, score, type, threshold } = matchResult;
 
-    // If rule-based matched, return content
-    if (score >= 1.0 && content) {
-      return content;
+    // Only return rule-based if we have a STRONG match
+    if (score < threshold || !match) {
+      return null; // Return null to trigger RAG
     }
 
-    // Otherwise, trigger RAG
+    // ONLY handle subtopic matches (exact keyword match)
+    if (type === 'subtopic') {
+      return chatbotData.topics[match.topic].subtopics[match.subtopic].content.text;
+    }
+
+    // For anything else, use RAG
     return null;
   },
 
@@ -228,7 +205,13 @@ export const chatbotUtils = {
       // Initialize Gemini
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash", // Latest free tier model
+        model: "gemini-2.5-flash", // Free tier model
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
+        }
       });
 
       // Load knowledge base
@@ -240,45 +223,18 @@ export const chatbotUtils = {
 
 ATURAN PENTING:
 1. Jawab HANYA berdasarkan data knowledge base di bawah
-2. Jika pertanyaan tidak ada di knowledge base, katakan: "Maaf, pertanyaan tersebut belum ada dalam materi saya. Coba tanya tentang tabung, kerucut, atau bola!" KECUALI jika pertanyaan masih berkaitan dengan materi tabung, kerucut, atau bola dan bangun ruang secara umum, jawab singkat sesuai yang anda bisa. Namun, tetap pastikan jawaban yang akademis dan sebisa mungkin mengikuti knowledge base
+2. Jika pertanyaan tidak ada di knowledge base, katakan: "Maaf, pertanyaan tersebut belum ada dalam materi saya. Coba tanya tentang tabung, kerucut, atau bola!" exception, jika pertanyaan masih berkaitan dengan materitabung, kerucut, atau bola dan bangun ruang secara umum, jawab singkat seuai yang anda bisa. Namun, tetap pastikan jawwaban yang akademis dan sebisa mungkin mengukuti knowledgebase
 3. Gunakan bahasa yang ramah dan mudah dipahami siswa
-4. Maksimal 250 kata
-5. Gunakan emoji yang sesuai untuk mempercantik jawaban (tapi jangan berlebihan)
-
-FORMAT JAWABAN WAJIB:
-- JANGAN gunakan format LaTeX ($...$, $$...$$, \\(...\\), \\[...\\])
-- JANGAN gunakan markdown untuk math (contoh: JANGAN tulis $\\pi$, $r^2$)
-- Gunakan simbol Unicode langsung: π (bukan $\\pi$), × (bukan *), ² (bukan ^2), ³ (bukan ^3)
-- Untuk rumus, tulis dalam format plain text yang jelas
-- Contoh BENAR: "V = π × r² × t"
-- Contoh SALAH: "V = $\\pi \\times r^2 \\times t$"
-- Gunakan **bold** untuk menekankan rumus atau poin penting
-- Gunakan bullet points (•) untuk list
-
-CONTOH FORMAT JAWABAN YANG BENAR:
-
-**Volume Tabung:**
-V = π × r² × t
-
-Keterangan:
-• V = Volume
-• π = 3,14 atau 22/7
-• r = jari-jari alas
-• t = tinggi tabung
-
-**Contoh Soal:**
-Jika r = 7 cm dan t = 10 cm, maka:
-V = π × r² × t
-V = 22/7 × 7² × 10
-V = 22/7 × 49 × 10
-V = 1.540 cm³
+4. Sertakan rumus dalam format yang jelas
+5. Berikan contoh jika relevan
+6. Maksimal 300 kata
 
 KNOWLEDGE BASE:
 ${JSON.stringify(knowledgeBase, null, 2)}
 
 PERTANYAAN SISWA: ${userQuestion}
 
-JAWABAN (ramah, jelas, tanpa LaTeX):`;
+JAWABAN (ramah & jelas):`;
 
       // Call Gemini with timeout
       const timeoutPromise = new Promise((_, reject) => 

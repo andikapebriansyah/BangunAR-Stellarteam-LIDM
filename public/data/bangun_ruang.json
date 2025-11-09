@@ -1,0 +1,384 @@
+[
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Definisi",
+    "informasi": "Tabung adalah bangun ruang tiga dimensi yang memiliki dua bidang berbentuk lingkaran sebagai alas dan tutup, serta satu bidang lengkung yang disebut selimut.",
+    "sumber": "PDF [cite: 2]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Unsur-unsur - Jumlah Sisi",
+    "informasi": "Tabung memiliki 3 bidang (sisi).",
+    "sumber": "PDF [cite: 38]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Unsur-unsur - Bentuk Sisi",
+    "informasi": "Sisi tabung terdiri dari 2 lingkaran (alas dan tutup) dan 1 persegi panjang (selimut).",
+    "sumber": "PDF [cite: 3, 38]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Unsur-unsur - Sifat Alas dan Tutup",
+    "informasi": "Sisi alas dan tutup tabung berbentuk lingkaran yang kongruen (sama bentuk dan ukuran) dan sejajar.",
+    "sumber": "PDF [cite: 39]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Unsur-unsur - Rusuk",
+    "informasi": "Tabung memiliki 2 rusuk lengkung (pada alas dan tutup).",
+    "sumber": "PDF [cite: 40]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Unsur-unsur - Titik Sudut",
+    "informasi": "Tabung tidak memiliki titik sudut.",
+    "sumber": "PDF "
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Jaring-jaring",
+    "informasi": "Jaring-jaring tabung terdiri dari dua buah lingkaran (alas dan tutup) dan sebuah selimut berbentuk persegipanjang.",
+    "sumber": "PDF [cite: 43, 44, 45]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Tabung",
+    "sub_topik": "Jaring-jaring - Ukuran Selimut",
+    "informasi": "Ukuran selimut tabung (persegi panjang) adalah: Panjang = Keliling alas (2*pi*r) dan Lebar = Tinggi tabung (t).",
+    "sumber": "PDF [cite: 46, 47]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Tabung",
+    "sub_topik": "Luas Selimut",
+    "formula": "L = 2 * π * r * t",
+    "informasi": "Rumus Luas Selimut Tabung = Keliling Lingkaran Alas * Tinggi. Rumusnya adalah 2 * pi * r * t.",
+    "sumber": "PDF [cite: 16, 17]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Tabung",
+    "sub_topik": "Luas Permukaan",
+    "formula": "L = 2 * π * r * (r + t)",
+    "informasi": "Rumus Luas Permukaan Tabung = Luas Selimut + Luas Alas + Luas Tutup. Rumusnya adalah 2*pi*r*t + 2*pi*r^2. Bisa disederhanakan menjadi 2 * pi * r * (r + t).",
+    "sumber": "PDF [cite: 21, 22, 23]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Tabung",
+    "sub_topik": "Volume",
+    "formula": "V = π * r^2 * t",
+    "informasi": "Rumus Volume Tabung = Luas Alas * Tinggi. Rumusnya adalah pi * r^2 * t.",
+    "sumber": "PDF [cite: 32, 33]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Definisi",
+    "informasi": "Kerucut adalah bangun ruang yang memiliki dua permukaan: satu bidang alas berupa lingkaran dan satu bidang sisi tegak lengkung (selimut kerucut).",
+    "sumber": "PDF [cite: 49, 50]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Unsur-unsur - Jumlah Sisi",
+    "informasi": "Kerucut memiliki 2 bidang sisi.",
+    "sumber": "PDF [cite: 59]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Unsur-unsur - Bentuk Sisi",
+    "informasi": "Sisi kerucut terdiri dari 1 sisi alas berbentuk lingkaran dan 1 sisi lengkung (selimut).",
+    "sumber": "PDF [cite: 59]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Unsur-unsur - Rusuk",
+    "informasi": "Kerucut memiliki 1 rusuk yang mengelilingi alas.",
+    "sumber": "PDF [cite: 61]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Unsur-unsur - Titik Puncak",
+    "informasi": "Kerucut memiliki 1 titik puncak.",
+    "sumber": "PDF [cite: 62]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Unsur-unsur - Garis Pelukis",
+    "informasi": "Garis pelukis (s) adalah garis yang menghubungkan titik puncak dengan rusuk alasnya.",
+    "sumber": "PDF [cite: 63]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Kerucut",
+    "sub_topik": "Jaring-jaring",
+    "informasi": "Jaring-jaring kerucut terdiri dari sebuah lingkaran (alas) dan sebuah juring lingkaran (selimut kerucut).",
+    "sumber": "PDF [cite: 68]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Kerucut",
+    "sub_topik": "Hubungan Pythagoras (r, t, s)",
+    "formula": "s^2 = r^2 + t^2",
+    "informasi": "Hubungan antara jari-jari (r), tinggi (t), dan garis pelukis (s) pada kerucut mengikuti rumus Pythagoras: s^2 = r^2 + t^2.",
+    "sumber": "PDF [cite: 64, 66]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Kerucut",
+    "sub_topik": "Luas Selimut",
+    "formula": "L = π * r * s",
+    "informasi": "Rumus Luas Selimut Kerucut adalah pi * r * s.",
+    "sumber": "PDF [cite: 90]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Kerucut",
+    "sub_topik": "Luas Permukaan",
+    "formula": "L = π * r * (r + s)",
+    "informasi": "Rumus Luas Permukaan Kerucut = Luas Alas + Luas Selimut. Rumusnya adalah (pi * r^2) + (pi * r * s). Bisa disederhanakan menjadi pi * r * (r + s).",
+    "sumber": "PDF [cite: 92, 94]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Kerucut",
+    "sub_topik": "Volume",
+    "formula": "V = 1/3 * π * r^2 * t",
+    "informasi": "Rumus Volume Kerucut adalah 1/3 dikali volume tabung. Rumusnya adalah 1/3 * pi * r^2 * t.",
+    "sumber": "PDF [cite: 100]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Bola",
+    "sub_topik": "Definisi",
+    "informasi": "Bola adalah bangun ruang sisi lengkung yang dibentuk dari tak hingga lingkaran yang memiliki jari-jari sama panjang dan berpusat pada titik yang sama.",
+    "sumber": "PDF [cite: 106]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Bola",
+    "sub_topik": "Unsur-unsur - Titik Sudut",
+    "informasi": "Bola tidak memiliki titik sudut.",
+    "sumber": "PDF [cite: 107]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Bola",
+    "sub_topik": "Unsur-unsur - Sisi",
+    "informasi": "Bola hanya memiliki sebuah sisi lengkung (disebut juga kulit bola atau selimut bola).",
+    "sumber": "PDF [cite: 107, 116]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Bola",
+    "sub_topik": "Unsur-unsur - Titik Pusat",
+    "informasi": "Bola memiliki 1 titik pusat.",
+    "sumber": "PDF [cite: 113]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Bola",
+    "sub_topik": "Unsur-unsur - Jari-jari",
+    "informasi": "Jari-jari bola (r) adalah jarak titik pusat bola ke titik pada kulit bola.",
+    "sumber": "PDF [cite: 115]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Bola",
+    "sub_topik": "Unsur-unsur - Diameter",
+    "informasi": "Diameter bola (d) adalah jarak lurus melintasi pusat bola, dari satu sisi kulit ke sisi lainnya. Panjangnya adalah 2 kali jari-jari (d = 2r).",
+    "sumber": "PDF [cite: 117, 125]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Bola",
+    "sub_topik": "Luas Permukaan",
+    "formula": "L = 4 * π * r^2",
+    "informasi": "Rumus Luas Permukaan Bola adalah 4 * pi * r^2. Ini sama dengan luas selimut tabung yang diameter dan tingginya sama dengan diameter bola.",
+    "sumber": "PDF [cite: 121, 123, 128]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Bola",
+    "sub_topik": "Volume",
+    "formula": "V = 4/3 * π * r^3",
+    "informasi": "Rumus Volume Bola adalah 4/3 * pi * r^3.",
+    "sumber": "PDF [cite: 142]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Bola",
+    "sub_topik": "Volume Setengah Bola",
+    "formula": "V = 2/3 * π * r^3",
+    "informasi": "Rumus Volume Setengah Bola adalah 2/3 * pi * r^3.",
+    "sumber": "PDF [cite: 138, 141]"
+  },
+  {
+    "tipe": "Rumus",
+    "topik": "Bola",
+    "sub_topik": "Luas Permukaan Setengah Bola Padat",
+    "formula": "L = 3 * π * r^2",
+    "informasi": "Luas Setengah Bola Padat (seperti mangkuk) = Luas 1/2 Kulit Bola + Luas Alas Lingkaran = (2 * pi * r^2) + (pi * r^2) = 3 * pi * r^2.",
+    "sumber": "Tambahan"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Variabel",
+    "sub_topik": "Konstanta Pi (π)",
+    "informasi": "Pi (π) adalah sebuah konstanta matematika. Nilai yang umum digunakan adalah 22/7 atau 3,14.",
+    "sumber": "PDF [cite: 20, 28, 36, 93, 97, 103, 132, 144]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Variabel",
+    "sub_topik": "Variabel r (jari-jari)",
+    "informasi": "r adalah singkatan dari jari-jari, yaitu 1/2 dari diameter (d).",
+    "sumber": "PDF [cite: 9, 55]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Variabel",
+    "sub_topik": "Variabel t (tinggi)",
+    "informasi": "t adalah singkatan dari tinggi bangun ruang.",
+    "sumber": "PDF [cite: 9, 19, 56]"
+  },
+  {
+    "tipe": "Definisi",
+    "topik": "Variabel",
+    "sub_topik": "Variabel s (garis pelukis)",
+    "informasi": "s adalah singkatan dari garis pelukis, khusus digunakan pada kerucut.",
+    "sumber": "PDF [cite: 57, 93]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus volume tabung?",
+    "jawaban": "Volume tabung adalah pi dikali r kuadrat dikali t (V = π * r^2 * t).",
+    "topik": "Tabung",
+    "sumber": "PDF [cite: 33]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus luas permukaan tabung?",
+    "jawaban": "Luas permukaan tabung adalah 2 dikali pi dikali r dikali (r + t), atau L = 2πrt + 2πr^2.",
+    "topik": "Tabung",
+    "sumber": "PDF [cite: 23]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus luas selimut tabung?",
+    "jawaban": "Luas selimut tabung adalah 2 dikali pi dikali r dikali t (L = 2πrt).",
+    "topik": "Tabung",
+    "sumber": "PDF [cite: 17]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apakah tabung punya titik sudut?",
+    "jawaban": "Tidak, tabung tidak memiliki titik sudut.",
+    "topik": "Tabung",
+    "sumber": "PDF "
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Berapa jumlah sisi tabung?",
+    "jawaban": "Tabung memiliki 3 sisi: 1 sisi alas (lingkaran), 1 sisi tutup (lingkaran), dan 1 sisi selimut (persegi panjang).",
+    "topik": "Tabung",
+    "sumber": "PDF [cite: 38]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa bentuk selimut tabung jika dibuka?",
+    "jawaban": "Selimut tabung berbentuk persegi panjang jika dibuka atau direntangkan.",
+    "topik": "Tabung",
+    "sumber": "PDF [cite: 3]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus volume kerucut?",
+    "jawaban": "Volume kerucut adalah 1/3 dikali pi dikali r kuadrat dikali t (V = 1/3 * π * r^2 * t).",
+    "topik": "Kerucut",
+    "sumber": "PDF [cite: 100]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus luas permukaan kerucut?",
+    "jawaban": "Luas permukaan kerucut adalah pi dikali r dikali (r + s), atau L = πr^2 + πrs.",
+    "topik": "Kerucut",
+    "sumber": "PDF [cite: 94]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus luas selimut kerucut?",
+    "jawaban": "Luas selimut kerucut adalah pi dikali r dikali s (L = πrs).",
+    "topik": "Kerucut",
+    "sumber": "PDF [cite: 90]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa itu garis pelukis kerucut?",
+    "jawaban": "Garis pelukis (s) adalah garis yang menghubungkan titik puncak kerucut dengan rusuk alasnya.",
+    "topik": "Kerucut",
+    "sumber": "PDF [cite: 63]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Bagaimana cara mencari garis pelukis (s) kerucut?",
+    "jawaban": "Kita bisa menggunakan rumus Pythagoras: s kuadrat = r kuadrat + t kuadrat (s^2 = r^2 + t^2).",
+    "topik": "Kerucut",
+    "sumber": "PDF [cite: 66]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apakah kerucut punya titik sudut?",
+    "jawaban": "Ya, kerucut memiliki 1 titik puncak (sering dianggap sebagai titik sudut).",
+    "topik": "Kerucut",
+    "sumber": "PDF [cite: 62]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus volume bola?",
+    "jawaban": "Volume bola adalah 4/3 dikali pi dikali r pangkat tiga (V = 4/3 * π * r^3).",
+    "topik": "Bola",
+    "sumber": "PDF [cite: 142]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apa rumus luas permukaan bola?",
+    "jawaban": "Luas permukaan bola adalah 4 dikali pi dikali r kuadrat (L = 4 * π * r^2).",
+    "topik": "Bola",
+    "sumber": "PDF [cite: 128]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apakah bola punya rusuk?",
+    "jawaban": "Tidak, bola tidak memiliki rusuk.",
+    "topik": "Bola",
+    "sumber": "Tambahan (Implisit dari PDF)"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Apakah bola punya titik sudut?",
+    "jawaban": "Tidak, bola tidak memiliki titik sudut.",
+    "topik": "Bola",
+    "sumber": "PDF [cite: 107]"
+  },
+  {
+    "tipe": "QA",
+    "pertanyaan": "Berapa jumlah sisi bola?",
+    "jawaban": "Bola hanya memiliki 1 sisi lengkung.",
+    "topik": "Bola",
+    "sumber": "PDF [cite: 107]"
+  }
+]

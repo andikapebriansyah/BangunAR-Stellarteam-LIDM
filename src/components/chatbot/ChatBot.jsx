@@ -70,46 +70,71 @@ const ChatBot = () => {
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate bot thinking time
-    setTimeout(() => {
-      try {
-        console.log('Processing message:', userMessage.content);
+    try {
+      console.log('Processing message:', userMessage.content);
+      
+      // STEP 1: Try Rule-Based First (Priority)
+      const matchResult = chatbotUtils.findBestMatch(userMessage.content);
+      console.log('Match result:', matchResult);
+      
+      let response;
+      
+      // Check if rule-based found a match
+      if (matchResult.type === 'greeting') {
+        // Instant response for greetings
+        response = matchResult.content;
         
-        // Use simple response generation first
-        const matchResult = chatbotUtils.findBestMatch(userMessage.content);
-        console.log('Match result:', matchResult);
+        // Simulate minimal delay for natural feel
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        let response;
+      } else if (matchResult.type === 'help') {
+        // Instant response for help
+        response = matchResult.content;
         
-        if (matchResult.type === 'greeting') {
-          response = matchResult.content;
-        } else if (matchResult.type === 'help') {
-          response = matchResult.content;
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+      } else {
+        // Try to generate rule-based response
+        response = chatbotUtils.generateResponse(matchResult);
+        
+        if (response) {
+          // Rule-based found answer
+          await new Promise(resolve => setTimeout(resolve, 800));
         } else {
-          response = chatbotUtils.generateResponse(matchResult);
+          // STEP 2: No rule-based match, use RAG with Gemini
+          console.log('No rule-based match, calling Gemini RAG...');
+          
+          const ragResult = await chatbotUtils.callGeminiRAG(userMessage.content);
+          
+          if (ragResult.success) {
+            response = ragResult.response;
+          } else {
+            response = ragResult.response; // Error message
+          }
         }
-
-        console.log('Generated response:', response);
-
-        const botMessage = {
-          type: 'bot',
-          content: response,
-          timestamp: new Date()
-        };
-
-        setMessages(prev => [...prev, botMessage]);
-        setIsTyping(false);
-      } catch (error) {
-        console.error('Chatbot error:', error);
-        const errorMessage = {
-          type: 'bot',
-          content: "Maaf, ada masalah teknis. Silakan coba lagi! Error: " + error.message,
-          timestamp: new Date()
-        };
-        setMessages(prev => [...prev, errorMessage]);
-        setIsTyping(false);
       }
-    }, 1000); // Fixed delay for debugging
+
+      console.log('Generated response:', response);
+
+      const botMessage = {
+        type: 'bot',
+        content: response,
+        timestamp: new Date()
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+      setIsTyping(false);
+      
+    } catch (error) {
+      console.error('Chatbot error:', error);
+      const errorMessage = {
+        type: 'bot',
+        content: "Maaf, ada masalah teknis. Silakan coba lagi atau ketik 'bantuan' untuk menu! 🔧",
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      setIsTyping(false);
+    }
   };
 
   // Handle quick replies
@@ -226,10 +251,13 @@ const ChatBot = () => {
               {isTyping && (
                 <div className="flex justify-start">
                   <div className="bg-white rounded-2xl rounded-bl-none px-4 py-3 border border-gray-200 shadow-sm">
-                    <div className="flex space-x-1">
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex space-x-1">
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                        <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                      </div>
+                      <span className="text-xs text-gray-500 italic animate-pulse">AI sedang berpikir...</span>
                     </div>
                   </div>
                 </div>
@@ -292,7 +320,7 @@ const ChatBot = () => {
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   placeholder="Ketik pertanyaan Anda..."
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-800 placeholder-gray-400"
                   disabled={isTyping}
                 />
                 <button

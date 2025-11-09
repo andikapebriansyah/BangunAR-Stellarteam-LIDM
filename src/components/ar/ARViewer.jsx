@@ -99,14 +99,17 @@ export default function ARViewer({ isARActive, modelSrc, modelAlt, elementsData,
         field-of-view="35deg"
         min-camera-orbit="auto auto 2m"
         max-camera-orbit="auto auto 8m"
-        shadow-intensity="1"
+        shadow-intensity="0"
         environment-image="neutral"
-        exposure="1"
-        shadow-softness="0.5"
+        skybox-image=""
+        exposure="2
+        "
+        shadow-softness="0"
         interaction-prompt="none"
         className="w-full h-full bg-transparent"
         style={{
-          '--poster-color': 'transparent'
+          '--poster-color': 'transparent',
+          filter: 'saturate(1.3) brightness(1.1)'
         }}
         
       >

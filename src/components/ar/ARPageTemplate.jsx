@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import ARViewer from './ARViewer';
 
@@ -9,6 +9,7 @@ export default function ARPageTemplate({ title, subtitle, modelSrc, modelAlt, el
   const [selectedElement, setSelectedElement] = useState(null);
   const [showARStatus, setShowARStatus] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef(null);
 
   const toggleAR = () => {
     setIsARActive(!isARActive);
@@ -25,6 +26,27 @@ export default function ARPageTemplate({ title, subtitle, modelSrc, modelAlt, el
       router.back();
     }
   };
+
+  // Stop audio when panel is closed
+  const handleClosePanel = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      audioRef.current = null;
+    }
+    setIsPlaying(false);
+    setSelectedElement(null);
+  };
+
+  // Cleanup audio on unmount
+  useEffect(() => {
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.currentTime = 0;
+      }
+    };
+  }, []);
 
   return (
     <div className={`h-screen text-white overflow-hidden transition-all duration-500 flex flex-col ${
@@ -115,7 +137,7 @@ export default function ARPageTemplate({ title, subtitle, modelSrc, modelAlt, el
           <div className="relative max-w-4xl mx-auto p-6 pb-8">
             {/* Close Button */}
             <button
-              onClick={() => setSelectedElement(null)}
+              onClick={handleClosePanel}
               className="absolute top-4 right-4 w-8 h-8 bg-white/10 border border-white/30 rounded-full flex items-center justify-center hover:bg-white/20 transition-all"
             >
               ×
@@ -157,10 +179,22 @@ export default function ARPageTemplate({ title, subtitle, modelSrc, modelAlt, el
             {selectedElement.audioUrl && (
               <button
                 onClick={() => {
+                  // Stop previous audio if exists
+                  if (audioRef.current) {
+                    audioRef.current.pause();
+                    audioRef.current.currentTime = 0;
+                  }
+                  
+                  // Create and play new audio
                   const audio = new Audio(selectedElement.audioUrl);
+                  audioRef.current = audio;
                   audio.play();
                   setIsPlaying(true);
-                  audio.onended = () => setIsPlaying(false);
+                  
+                  audio.onended = () => {
+                    setIsPlaying(false);
+                    audioRef.current = null;
+                  };
                 }}
                 className={`w-full py-3 rounded-xl font-medium transition-all flex items-center justify-center gap-2 ${
                   isPlaying 

@@ -18,7 +18,7 @@ export default function ARSilinder() {
       ],
       icon: '⭕',
       color: '#4A9EFF',
-      audioUrl: '/audio/tabung-alas-atas.mp3'
+      audioUrl: '/audio/tabung/tabung-alas atas.mp3'
     },
     {
       id: 'alas-bawah',
@@ -35,7 +35,7 @@ export default function ARSilinder() {
       ],
       icon: '⭕',
       color: '#4A9EFF',
-      audioUrl: '/audio/tabung-alas-bawah.mp3'
+      audioUrl: '/audio/tabung/tabung-alas bawah.mp3'
     },
     {
       id: 'selimut',
@@ -52,7 +52,7 @@ export default function ARSilinder() {
       ],
       icon: '📜',
       color: '#FF6B6B',
-      audioUrl: '/audio/tabung-selimut.mp3'
+      audioUrl: '/audio/tabung/tabung-selimut.mp3'
     },
     {
       id: 'tinggi',
@@ -69,7 +69,7 @@ export default function ARSilinder() {
       ],
       icon: '📏',
       color: '#FFD93D',
-      audioUrl: '/audio/tabung-tinggi.mp3'
+      audioUrl: '/audio/tabung/tabung-tinggi.mp3'
     },
     {
       id: 'jari-jari',
@@ -86,7 +86,7 @@ export default function ARSilinder() {
       ],
       icon: '📐',
       color: '#6BCB77',
-      audioUrl: '/audio/tabung-jari-jari.mp3'
+      audioUrl: '/audio/tabung/tabung-jari-jari.mp3'
     }
   ];
 
