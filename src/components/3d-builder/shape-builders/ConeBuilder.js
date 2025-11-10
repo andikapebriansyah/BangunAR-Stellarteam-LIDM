@@ -74,7 +74,7 @@ export class ConeBuilder {
   }
 
   /**
-   * Create sector component (selimut juring kerucut)
+   * Create sector component (selimut juring kerucut atau juring terpotong frustum)
    * @param {string} componentType - Component identifier
    * @param {number} color - Hex color
    * @param {object} params - Shape parameters {radius/radiusBottom/radiusTop, height}
@@ -87,20 +87,75 @@ export class ConeBuilder {
     const radiusTop = (params.radiusTop || 0) * scale; // 0 for perfect cone
     const height = params.height * scale;
     
-    // For frustum, use average radius for sector calculation
-    const radius = radiusTop > 0 ? (radiusBottom + radiusTop) / 2 : radiusBottom;
+    let geometry;
     
-    // Calculate slant height (garis pelukis)
-    const slantHeight = Math.sqrt(
-      Math.pow(radiusBottom - radiusTop, 2) + Math.pow(height, 2)
-    );
-    
-    // Calculate sector angle in radians
-    // Keliling alas = panjang busur: 2πr = θl → θ = 2πr/l
-    const theta = (2 * Math.PI * radius) / slantHeight;
-    
-    // Create sector as partial circle
-    const geometry = new THREE.CircleGeometry(slantHeight, 64, 0, theta);
+    // FRUSTUM (kerucut terpotong): selimut = JURING TERPOTONG (truncated sector)
+    if (radiusTop > 0) {
+      // Calculate slant heights
+      // L = garis pelukis besar (dari pusat kerucut imajiner ke busur bawah)
+      // l = garis pelukis kecil (dari pusat kerucut imajiner ke busur atas)
+      
+      // Ratio: radiusTop/radiusBottom = l/L
+      // Tinggi frustum: h = L - l
+      // Maka: L = h * radiusBottom / (radiusBottom - radiusTop)
+      
+      const slantBig = height * radiusBottom / (radiusBottom - radiusTop);
+      const slantSmall = height * radiusTop / (radiusBottom - radiusTop);
+      
+      // Sudut sector (sama untuk kedua busur)
+      const theta = (2 * Math.PI * radiusBottom) / slantBig;
+      
+      // Create JURING TERPOTONG menggunakan Shape dengan 2 busur
+      const shape = new THREE.Shape();
+      
+      const segments = 64;
+      
+      // Mulai dari ujung kiri busur bawah
+      shape.moveTo(
+        slantBig * Math.cos(-theta / 2),
+        slantBig * Math.sin(-theta / 2)
+      );
+      
+      // Gambar busur BAWAH (radius besar) dari kiri ke kanan
+      for (let i = 0; i <= segments; i++) {
+        const angle = -theta / 2 + (theta * i) / segments;
+        const x = slantBig * Math.cos(angle);
+        const y = slantBig * Math.sin(angle);
+        shape.lineTo(x, y);
+      }
+      
+      // Garis dari ujung busur bawah ke ujung busur atas (sisi kanan)
+      shape.lineTo(
+        slantSmall * Math.cos(theta / 2),
+        slantSmall * Math.sin(theta / 2)
+      );
+      
+      // Gambar busur ATAS (radius kecil) dari kanan ke kiri (terbalik)
+      for (let i = segments; i >= 0; i--) {
+        const angle = -theta / 2 + (theta * i) / segments;
+        const x = slantSmall * Math.cos(angle);
+        const y = slantSmall * Math.sin(angle);
+        shape.lineTo(x, y);
+      }
+      
+      // Close shape kembali ke titik awal
+      shape.closePath();
+      
+      geometry = new THREE.ShapeGeometry(shape);
+      
+    } else {
+      // PERFECT CONE: selimut = SECTOR penuh (juring)
+      const slantHeight = Math.sqrt(
+        Math.pow(radiusBottom, 2) + Math.pow(height, 2)
+      );
+      
+      // Calculate sector angle in radians
+      // Keliling alas = panjang busur: 2πr = θl → θ = 2πr/l
+      const theta = (2 * Math.PI * radiusBottom) / slantHeight;
+      
+      // Create sector as partial circle
+      geometry = new THREE.CircleGeometry(slantHeight, 64, 0, theta);
+    }
     
     const material = new THREE.MeshStandardMaterial({
       color,
@@ -112,14 +167,21 @@ export class ConeBuilder {
     const mesh = new THREE.Mesh(geometry, material);
     mesh.rotation.x = -Math.PI / 2; // Lie flat
     
+    // Add border/edges for visibility
+    const edgesGeometry = new THREE.EdgesGeometry(geometry);
+    const edgesMaterial = new THREE.LineBasicMaterial({ 
+      color: 0x333333, 
+      linewidth: 2 
+    });
+    const edges = new THREE.LineSegments(edgesGeometry, edgesMaterial);
+    mesh.add(edges);
+    
     mesh.userData.componentType = componentType;
     mesh.userData.is2DComponent = true;
     mesh.userData.partType = 'sector';
     mesh.userData.radiusBottom = radiusBottom;
     mesh.userData.radiusTop = radiusTop;
     mesh.userData.height = height;
-    mesh.userData.slantHeight = slantHeight;
-    mesh.userData.theta = theta;
     mesh.userData.scale = scale;
     
     mesh.castShadow = true;

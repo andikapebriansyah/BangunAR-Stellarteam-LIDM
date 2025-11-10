@@ -269,7 +269,7 @@ export const rocketBaseBlueprint = {
     {
       id: 'cone_base',
       type: 'cone_base',
-      position: new THREE.Vector3(0, 0.5, 0), // y = height/2 = 1.0/2 = 0.5
+      position: new THREE.Vector3(0, 2.0, 0), // Lifted +0.5 from ground (was 0.5)
       color: 0xFFA500, // Orange (flame color)
       params: { 
         radiusBottom: 1.2,  // Radius alas bawah
@@ -305,7 +305,7 @@ export const rocketBaseBlueprint = {
     {
       id: 'cylinder_body',
       type: 'cylinder_body',
-      position: new THREE.Vector3(0, 2.25, 0), // y = 1.0 (frustum height) + 2.5/2 (cylinder height/2) = 2.25
+      position: new THREE.Vector3(0, 3.75, 0), // Lifted +0.5 (was 2.25)
       color: 0xE8E8E8, // Silver/White (rocket body)
       params: { radius: 0.5, height: 2.5 },
       displayName: 'Badan Roket',
@@ -319,25 +319,25 @@ export const rocketBaseBlueprint = {
           componentType: 'circle_body_bottom'
         },
         { 
-          id: 'side', 
-          type: 'rectangle', 
-          accepts: 'rect_body',
-          label: 'Selimut Badan',
-          componentType: 'rect_body'
-        },
-        { 
           id: 'top', 
           type: 'circle', 
           accepts: 'circle_body_top',
           label: 'Tutup Badan',
           componentType: 'circle_body_top'
+        },
+        { 
+          id: 'side', 
+          type: 'rectangle', 
+          accepts: 'rect_body',
+          label: 'Selimut Badan',
+          componentType: 'rect_body'
         }
       ]
     },
     {
       id: 'cone_nose',
       type: 'cone_nose',
-      position: new THREE.Vector3(0, 4.1, 0), // y = 1.0 + 2.5 + 1.2/2 = 4.1
+      position: new THREE.Vector3(0, 5.6, 0), // Lifted +0.5 (was 4.1)
       color: 0xFF4444, // Red (nose cone)
       params: { radius: 0.5, height: 1.2 },
       displayName: 'Kerucut Hidung',

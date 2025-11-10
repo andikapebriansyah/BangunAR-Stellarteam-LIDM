@@ -65,6 +65,18 @@ export function useHotspotZones(sceneRef, blueprint, shapeBuilder, selectedSize,
           isFilled
         );
         
+        // DEBUG: Verify itemIndex is set correctly
+        console.log(`🔧 [useHotspotZones] Creating hotspot:`, {
+          itemIndex,
+          itemId: item.id,
+          partId: part.id,
+          partType: part.type,
+          zoneItemIndex: zone.userData.itemIndex,
+          zoneCylinderIndex: zone.userData.cylinderIndex,
+          position: { x: zone.position.x.toFixed(2), y: zone.position.y.toFixed(2), z: zone.position.z.toFixed(2) },
+          isFilled
+        });
+        
         sceneRef.current.add(zone);
         hotspotZonesRef.current.push(zone);
         

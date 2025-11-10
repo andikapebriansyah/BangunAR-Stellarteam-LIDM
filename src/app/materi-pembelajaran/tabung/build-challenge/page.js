@@ -45,6 +45,7 @@ export default function TabungBuildChallenge() {
   const [validationErrors, setValidationErrors] = useState({});
   const [sizesConfirmed, setSizesConfirmed] = useState(false);
   const [showSizeWarning, setShowSizeWarning] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0); // Trigger untuk force re-render blueprint
   
   // Detect mobile/desktop
   useEffect(() => {
@@ -272,13 +273,35 @@ export default function TabungBuildChallenge() {
     // Reset state
     resetState();
     
-    // Trigger re-render of blueprint
+    // CRITICAL: Remove targetGroup dan hotspots untuk force re-render
     if (targetGroupRef.current) {
       sceneRef.current.remove(targetGroupRef.current);
+      // Dispose geometries and materials
+      targetGroupRef.current.traverse((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(mat => mat.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      });
       targetGroupRef.current = null;
     }
     
-    // Will be re-created by BuilderScene
+    // Remove hotspot zones
+    if (hotspotZonesRef.current) {
+      hotspotZonesRef.current.forEach(zone => {
+        sceneRef.current.remove(zone);
+        if (zone.geometry) zone.geometry.dispose();
+        if (zone.material) zone.material.dispose();
+      });
+      hotspotZonesRef.current = [];
+    }
+    
+    // Increment reset trigger to force BuilderScene re-render
+    setResetTrigger(prev => prev + 1);
   }, [resetState, replacedItemsRef]);
   
   /**
@@ -550,6 +573,7 @@ export default function TabungBuildChallenge() {
                     itemParts={itemParts}
                     onPartFilled={handlePartFilled}
                     setHoveredZone={setHoveredZone}
+                    resetTrigger={resetTrigger}
                   />
                   
                   {/* Mobile: Dropdown Component Selector at Bottom of Scene */}

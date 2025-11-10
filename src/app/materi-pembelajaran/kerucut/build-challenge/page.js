@@ -42,9 +42,11 @@ export default function KerucutBuildChallenge() {
     body: { radius: 5, height: 25 },
     nose: { radius: 5, height: 12 }
   });
+  const [baseRadius, setBaseRadius] = useState(12); // Input tunggal untuk radius dasar
   const [validationErrors, setValidationErrors] = useState({});
   const [sizesConfirmed, setSizesConfirmed] = useState(false);
   const [showSizeWarning, setShowSizeWarning] = useState(false);
+  const [resetTrigger, setResetTrigger] = useState(0); // Trigger untuk force re-render blueprint
   
   // Detect mobile/desktop
   useEffect(() => {
@@ -56,26 +58,46 @@ export default function KerucutBuildChallenge() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
   
-  // Validate custom sizes
+  // Auto-calculate all sizes based on base radius
+  useEffect(() => {
+    // Skala proporsional dari radius dasar
+    // Ratio default: base=12, body=5, nose=5
+    // Heights: base=10, body=25, nose=12
+    
+    const bodyRadius = Math.round(baseRadius * (5/12)); // 41.67% dari base
+    const noseRadius = bodyRadius; // Same as body for alignment
+    
+    const baseHeight = Math.round(baseRadius * (10/12)); // 83.33% dari base radius
+    const bodyHeight = Math.round(baseRadius * (25/12)); // 208.33% dari base radius
+    const noseHeight = Math.round(baseRadius * (12/12)); // 100% dari base radius (sama dengan base radius)
+    
+    setCustomSizes({
+      base: { 
+        radius: baseRadius, 
+        height: baseHeight 
+      },
+      body: { 
+        radius: bodyRadius, 
+        height: bodyHeight 
+      },
+      nose: { 
+        radius: noseRadius, 
+        height: noseHeight 
+      }
+    });
+  }, [baseRadius]);
+  
+  // Validate custom sizes (simplified - auto-calculated sizes always valid)
+  // Validate custom sizes (simplified - auto-calculated sizes always valid)
   useEffect(() => {
     const errors = {};
     
-    // Base radius must be larger than body/nose
+    // With auto-calculation, these should never fail, but keep for safety
     if (customSizes.base.radius <= customSizes.body.radius) {
       errors.baseRadius = 'Jari-jari kerucut dasar harus lebih besar dari badan roket!';
     }
-    if (customSizes.base.radius <= customSizes.nose.radius) {
-      errors.baseRadius2 = 'Jari-jari kerucut dasar harus lebih besar dari hidung roket!';
-    }
-    
-    // Body and nose radius should match
     if (customSizes.body.radius !== customSizes.nose.radius) {
       errors.alignment = 'Jari-jari badan roket dan hidung harus sama untuk struktur stabil!';
-    }
-    
-    // Reasonable height ratios
-    if (customSizes.body.height < customSizes.base.height + customSizes.nose.height) {
-      errors.proportion = 'Tinggi badan roket harus lebih besar dari total tinggi kedua kerucut!';
     }
     
     setValidationErrors(errors);
@@ -135,16 +157,13 @@ export default function KerucutBuildChallenge() {
   );
   
   /**
-   * Handle custom size change
+   * Handle base radius change (single input)
    */
-  const handleSizeChange = useCallback((componentType, dimension, value) => {
-    setCustomSizes(prev => ({
-      ...prev,
-      [componentType]: {
-        ...prev[componentType],
-        [dimension]: value
-      }
-    }));
+  const handleBaseRadiusChange = useCallback((value) => {
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue) && numValue >= 8 && numValue <= 20) {
+      setBaseRadius(numValue);
+    }
   }, []);
   
   /**
@@ -256,13 +275,34 @@ export default function KerucutBuildChallenge() {
     // Reset state
     resetState();
     
-    // Trigger re-render of blueprint
+    // CRITICAL: Remove targetGroup dan hotspots untuk force re-render
     if (targetGroupRef.current) {
       sceneRef.current.remove(targetGroupRef.current);
+      targetGroupRef.current.traverse((child) => {
+        if (child.geometry) child.geometry.dispose();
+        if (child.material) {
+          if (Array.isArray(child.material)) {
+            child.material.forEach(mat => mat.dispose());
+          } else {
+            child.material.dispose();
+          }
+        }
+      });
       targetGroupRef.current = null;
     }
     
-    // Will be re-created by BuilderScene
+    // Remove hotspot zones
+    if (hotspotZonesRef.current) {
+      hotspotZonesRef.current.forEach(zone => {
+        sceneRef.current.remove(zone);
+        if (zone.geometry) zone.geometry.dispose();
+        if (zone.material) zone.material.dispose();
+      });
+      hotspotZonesRef.current = [];
+    }
+    
+    // Increment reset trigger to force BuilderScene re-render
+    setResetTrigger(prev => prev + 1);
   }, [resetState, replacedItemsRef]);
   
   /**
@@ -348,8 +388,9 @@ export default function KerucutBuildChallenge() {
             {/* Instruction & Customization Panel */}
             <KerucutInstructionPanel
               ref={instructionPanelRef}
+              baseRadius={baseRadius}
               customSizes={customSizes}
-              onSizeChange={handleSizeChange}
+              onBaseRadiusChange={handleBaseRadiusChange}
               validationErrors={validationErrors}
               onConfirmSizes={handleConfirmSizes}
               shouldBlink={showSizeWarning}
@@ -404,6 +445,7 @@ export default function KerucutBuildChallenge() {
                     itemParts={itemParts}
                     onPartFilled={handlePartFilled}
                     setHoveredZone={setHoveredZone}
+                    resetTrigger={resetTrigger}
                   />
                   
                   {/* Mobile: Dropdown Component Selector at Bottom of Scene */}

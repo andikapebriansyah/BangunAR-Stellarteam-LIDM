@@ -23,7 +23,8 @@ export function BuilderScene({
   selectedSize,
   itemParts,
   onPartFilled,
-  setHoveredZone
+  setHoveredZone,
+  resetTrigger = 0 // ✅ Trigger untuk force re-render saat reset
 }) {
   const mountRef = useRef(null);
   // ❌ Don't create new scene - use the one from props!
@@ -41,6 +42,11 @@ export function BuilderScene({
   const pointerRef = useRef(new THREE.Vector2());
   const draggedObjectRef = useRef(null);
   const dragPlaneRef = useRef(new THREE.Plane());
+  
+  // Fire effect refs (ONLY for rocket)
+  const fireEffectRef = useRef(null);
+  const fireParticlesRef = useRef(null);
+  const fireCreatedRef = useRef(false);
   
   const [rendererReady, setRendererReady] = useState(false);
   const [isLoading3D, setIsLoading3D] = useState(true);
@@ -274,7 +280,15 @@ export function BuilderScene({
       const camera = cameraRef.current;
       camera.aspect = width / height;
       camera.updateProjectionMatrix();
-      camera.position.set(5, 5, 5);
+      
+      // Adjust camera position based on shape type
+      if (blueprint.shapeType === 'rocket') {
+        // Rocket is taller, position camera higher
+        camera.position.set(6, 9, 5);
+      } else {
+        camera.position.set(5, 5, 5);
+      }
+      
       camera.lookAt(0, 0, 0);
 
       const controls = new OrbitControls(camera, renderer.domElement);
@@ -441,6 +455,43 @@ export function BuilderScene({
           if (controls && renderer && scene && camera && renderer.domElement) {
             try {
               animateBackground(scene, currentTime, isMobile);
+              
+              // 🔥 ANIMATE FIRE PARTICLES (ONLY for rocket)
+              if (fireParticlesRef.current && blueprint.shapeType === 'rocket') {
+                const { particles, positions, velocities, lifetimes, maxHeight } = fireParticlesRef.current;
+                const positionAttribute = particles.geometry.attributes.position;
+                
+                for (let i = 0; i < positions.length / 3; i++) {
+                  const i3 = i * 3;
+                  
+                  // Update position
+                  positions[i3] += velocities[i3] * 0.016; // X
+                  positions[i3 + 1] += velocities[i3 + 1] * 0.016; // Y (upward)
+                  positions[i3 + 2] += velocities[i3 + 2] * 0.016; // Z
+                  
+                  // Update lifetime
+                  lifetimes[i] += 0.01;
+                  
+                  // Reset particle when it goes too high or fades out
+                  if (positions[i3 + 1] > maxHeight || lifetimes[i] > 1) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const radius = Math.random() * 0.8;
+                    
+                    positions[i3] = Math.cos(angle) * radius * selectedSize;
+                    positions[i3 + 1] = Math.random() * 0.3 * selectedSize;
+                    positions[i3 + 2] = Math.sin(angle) * radius * selectedSize;
+                    
+                    lifetimes[i] = 0;
+                  }
+                }
+                
+                positionAttribute.needsUpdate = true;
+                
+                // Update material color (gradient orange → yellow → red)
+                const hue = 0.05 + Math.sin(currentTime * 0.002) * 0.05; // 0.0-0.1 (red-orange-yellow)
+                particles.material.color.setHSL(hue, 1.0, 0.5);
+              }
+              
               controls.update();
               renderer.render(scene, camera);
             } catch (error) {
@@ -522,6 +573,15 @@ export function BuilderScene({
       renderTargetBlueprint();
     }
   }, [selectedSize, sceneInitialized, rendererReady, renderTargetBlueprint]);
+  
+  // Re-render blueprint on reset trigger
+  useEffect(() => {
+    if (resetTrigger > 0 && sceneInitialized && rendererReady) {
+      console.log('🔄 Re-rendering blueprint due to RESET');
+      blueprintRenderedRef.current = false; // Reset flag
+      renderTargetBlueprint();
+    }
+  }, [resetTrigger, sceneInitialized, rendererReady, renderTargetBlueprint]);
 
   // Drag and drop logic
   useEffect(() => {
@@ -844,6 +904,83 @@ export function BuilderScene({
     };
   }, [rendererReady, blueprint, shapeBuilder, hotspotZonesRef, draggableObjectsRef, onPartFilled, setHoveredZone]);
 
+  // Create fire effect for rocket (ONLY after all parts complete)
+  const createFireEffect = useCallback(() => {
+    if (fireCreatedRef.current || blueprint.shapeType !== 'rocket') {
+      return; // Only for rocket, and only once
+    }
+    
+    console.log('🔥 Creating fire effect for rocket!');
+    
+    // Particle count (optimized for mobile)
+    const particleCount = isMobile ? 80 : 120;
+    
+    // Create particle positions
+    const positions = new Float32Array(particleCount * 3);
+    const velocities = new Float32Array(particleCount * 3);
+    const sizes = new Float32Array(particleCount);
+    const lifetimes = new Float32Array(particleCount);
+    
+    for (let i = 0; i < particleCount; i++) {
+      const i3 = i * 3;
+      
+      // Start position: random circle at base
+      const angle = Math.random() * Math.PI * 2;
+      const radius = Math.random() * 0.8; // Within frustum base
+      
+      positions[i3] = Math.cos(angle) * radius * selectedSize;
+      positions[i3 + 1] = Math.random() * 0.3 * selectedSize; // Start height
+      positions[i3 + 2] = Math.sin(angle) * radius * selectedSize;
+      
+      // Velocity: upward with slight outward
+      velocities[i3] = (Math.random() - 0.5) * 0.3;
+      velocities[i3 + 1] = 0.5 + Math.random() * 0.5; // Upward speed
+      velocities[i3 + 2] = (Math.random() - 0.5) * 0.3;
+      
+      // Particle size
+      sizes[i] = 0.1 + Math.random() * 0.15;
+      
+      // Lifetime (for fading)
+      lifetimes[i] = Math.random();
+    }
+    
+    // Create geometry
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+    
+    // Create material with gradient colors
+    const material = new THREE.PointsMaterial({
+      size: 0.2 * selectedSize,
+      color: 0xff6600, // Orange
+      transparent: true,
+      opacity: 0.8,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      sizeAttenuation: true
+    });
+    
+    // Create particle system
+    const particles = new THREE.Points(geometry, material);
+    particles.position.y = 0.5 * selectedSize; // Just above ground
+    
+    // Store refs for animation
+    fireParticlesRef.current = {
+      particles,
+      positions,
+      velocities,
+      sizes,
+      lifetimes,
+      maxHeight: 1.5 * selectedSize
+    };
+    
+    sceneRef.current.add(particles);
+    fireEffectRef.current = particles;
+    fireCreatedRef.current = true;
+    
+    console.log('✅ Fire effect created!');
+  }, [blueprint.shapeType, isMobile, selectedSize, sceneRef]);
+
   // Render replacement effect (ghost to solid)
   useEffect(() => {
     if (!targetGroupRef.current || !targetGroupRef.current.children) {
@@ -852,6 +989,12 @@ export function BuilderScene({
     
     itemParts.forEach((parts, index) => {
       const isComplete = shapeBuilder.validateCompletion(parts);
+      
+      console.log(`🔍 [BuilderScene] Item ${index} completion check:`, {
+        parts,
+        isComplete,
+        alreadyReplaced: replacedItemsRef.current.has(index)
+      });
       
       // Skip if already replaced
       if (replacedItemsRef.current.has(index)) {
@@ -921,25 +1064,70 @@ export function BuilderScene({
         // Mark as replaced (PERSISTENT)
         replacedItemsRef.current.add(index);
         
+        console.log(`🗑️ [BuilderScene] Removing hotspots for item ${index}`);
+        console.log(`   Total hotspots before: ${hotspotZonesRef.current.length}`);
+        console.log(`   Item details:`, {
+          itemId: blueprint.items[index].id,
+          itemType: blueprint.items[index].type,
+          totalParts: blueprint.items[index].parts.length
+        });
+        
         // REMOVE (not just hide) hotspots for this completed item
-        hotspotZonesRef.current.forEach(zone => {
-          const zoneItemIndex = zone.userData.itemIndex || zone.userData.cylinderIndex;
-          if (zoneItemIndex === index) {
+        let removedCount = 0;
+        const hotspotsToRemove = [];
+        
+        hotspotZonesRef.current.forEach((zone, zoneIdx) => {
+          const zoneItemIndex = zone.userData.itemIndex;
+          const zoneCylinderIndex = zone.userData.cylinderIndex;
+          
+          console.log(`   [${zoneIdx}] Zone check:`, {
+            zoneItemIndex,
+            zoneCylinderIndex,
+            targetIndex: index,
+            zoneType: zone.userData.zoneType,
+            partId: zone.userData.partId,
+            acceptsType: zone.userData.acceptsType,
+            hasParent: !!zone.parent,
+            parentName: zone.parent?.type || 'unknown',
+            shouldRemove: zoneItemIndex === index || zoneCylinderIndex === index
+          });
+          
+          // Match by itemIndex OR cylinderIndex
+          if (zoneItemIndex === index || zoneCylinderIndex === index) {
+            hotspotsToRemove.push(zone);
+            
             // Remove from scene completely
             if (zone.parent) {
               zone.parent.remove(zone);
+              removedCount++;
+              console.log(`   ✅ REMOVED from parent: ${zone.userData.partId} (${zone.userData.zoneType})`);
+            } else {
+              console.warn(`   ⚠️ Zone has NO PARENT: ${zone.userData.partId}`);
             }
+            
             // Dispose geometry and material
-            if (zone.geometry) zone.geometry.dispose();
-            if (zone.material) zone.material.dispose();
-            console.log(`�️ REMOVED hotspot zone for item ${index}, zone: ${zone.userData.zoneType}`);
+            if (zone.geometry) {
+              zone.geometry.dispose();
+            }
+            if (zone.material) {
+              zone.material.dispose();
+            }
           }
         });
         
         // Clean up hotspotZonesRef array
+        const beforeLength = hotspotZonesRef.current.length;
         hotspotZonesRef.current = hotspotZonesRef.current.filter(zone => {
           const zoneItemIndex = zone.userData.itemIndex || zone.userData.cylinderIndex;
           return zoneItemIndex !== index;
+        });
+        const afterLength = hotspotZonesRef.current.length;
+        
+        console.log(`   📊 Hotspot removal summary:`, {
+          removedFromScene: removedCount,
+          removedFromArray: beforeLength - afterLength,
+          hotspotsRemaining: afterLength,
+          itemsRemaining: hotspotsToRemove.map(z => `${z.userData.partId}(${z.userData.zoneType})`)
         });
         
         // Force re-render
@@ -950,7 +1138,16 @@ export function BuilderScene({
         console.log(`✅ Item ${index} is now SOLID`);
       }
     });
-  }, [itemParts, blueprint, shapeBuilder, selectedSize, targetGroupRef, replacedItemsRef, hotspotZonesRef]);
+    
+    // 🔥 CHECK: Create fire effect when ALL rocket parts complete
+    if (blueprint.shapeType === 'rocket' && 
+        replacedItemsRef.current.size === 3 && 
+        !fireCreatedRef.current) {
+      console.log('🚀 All rocket parts complete! Triggering fire effect...');
+      createFireEffect();
+    }
+    
+  }, [itemParts, blueprint, shapeBuilder, selectedSize, targetGroupRef, replacedItemsRef, hotspotZonesRef, createFireEffect]);
 
   return (
     <div className="border-2 border-dashed border-gray-300 rounded-xl overflow-hidden bg-gray-50 h-full relative">

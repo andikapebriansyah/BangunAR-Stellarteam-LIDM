@@ -31,7 +31,20 @@ export function useCompletionCheck(
     });
     
     if (filledParts === totalParts) {
-      setCompletionMessage('🎉 Selamat! Semua tabung berhasil dirakit dengan sempurna!');
+      // Check shape type for appropriate message
+      const isRocket = blueprint.shapeType === 'rocket';
+      const isSphere = blueprint.shapeType === 'sphere';
+      
+      let successMessage;
+      if (isRocket) {
+        successMessage = '🎉 Selamat! Roket berhasil dirakit dengan sempurna!';
+      } else if (isSphere) {
+        successMessage = '🎉 Selamat! Gelang bola berhasil dirakit dengan sempurna!';
+      } else {
+        successMessage = '🎉 Selamat! Semua tabung berhasil dirakit dengan sempurna!';
+      }
+      
+      setCompletionMessage(successMessage);
       setIsLevelComplete(true);
       
       // Save completion to localStorage
@@ -93,7 +106,19 @@ export function useCompletionCheck(
     });
 
     if (breakdown.length === 0) {
-      setCompletionMessage("Belum ada tabung yang selesai dirakit untuk dianalisis.");
+      const isRocket = blueprint.shapeType === 'rocket';
+      const isSphere = blueprint.shapeType === 'sphere';
+      
+      let emptyMessage;
+      if (isRocket) {
+        emptyMessage = "Belum ada komponen roket yang selesai dirakit untuk dianalisis.";
+      } else if (isSphere) {
+        emptyMessage = "Belum ada bola yang selesai dirakit untuk dianalisis.";
+      } else {
+        emptyMessage = "Belum ada tabung yang selesai dirakit untuk dianalisis.";
+      }
+      
+      setCompletionMessage(emptyMessage);
       return;
     }
 
@@ -102,7 +127,20 @@ export function useCompletionCheck(
       totalSurfaceArea: totalSurfaceArea.toFixed(2), 
       breakdown 
     });
-    setCompletionMessage("Analisis menara tabung selesai.");
+    
+    const isRocket = blueprint.shapeType === 'rocket';
+    const isSphere = blueprint.shapeType === 'sphere';
+    
+    let analysisMessage;
+    if (isRocket) {
+      analysisMessage = "Analisis roket selesai.";
+    } else if (isSphere) {
+      analysisMessage = "Analisis gelang bola selesai.";
+    } else {
+      analysisMessage = "Analisis menara tabung selesai.";
+    }
+    
+    setCompletionMessage(analysisMessage);
   }, [itemParts, blueprint, shapeBuilder, selectedSize, setCompletionMessage, setAnalysisResult]);
   
   return {
