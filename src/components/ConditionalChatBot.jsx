@@ -8,7 +8,8 @@ const ConditionalChatBot = () => {
   // List halaman di mana chatbot TIDAK boleh muncul
   const disabledPaths = [
     '/evaluasi',
-    '/diagnostik-tes'
+    '/diagnostik-tes',
+    '/materi-pembelajaran/tabung/build-challenge'
   ];
   
   // Cek apakah current path ada dalam daftar disabled

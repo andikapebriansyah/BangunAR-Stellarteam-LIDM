@@ -1,5 +1,5 @@
 /**
- * Tabung Build Challenge Page - REFACTORED VERSION
+ * Kerucut Build Challenge Page - MATCHES TABUNG UI 100%
  * Uses modular 3D builder components for clean, maintainable code
  * Responsive UI with floating menu for mobile, sidebar for desktop
  */
@@ -12,10 +12,10 @@ import Link from 'next/link';
 import * as THREE from 'three';
 
 // Configuration
-import { cylinderBlueprint } from '@/components/3d-builder/config/shapeBlueprints';
+import { rocketBaseBlueprint } from '@/components/3d-builder/config/shapeBlueprints';
 
 // Shape Builder
-import { CylinderBuilder } from '@/components/3d-builder/shape-builders/CylinderBuilder';
+import { ConeBuilder } from '@/components/3d-builder/shape-builders/ConeBuilder';
 
 // Core Components
 import { BuilderScene } from '@/components/3d-builder/core/BuilderScene';
@@ -31,16 +31,16 @@ import { FloatingComponentMenu } from '@/components/3d-builder/ui/FloatingCompon
 import { ProgressTracker } from '@/components/3d-builder/ui/ProgressTracker';
 import { AnalysisModal } from '@/components/3d-builder/ui/AnalysisModal';
 import { BuilderControls } from '@/components/3d-builder/ui/BuilderControls';
-import { InstructionPanel } from '@/components/3d-builder/instruction-panel/TabungInstructionPanel';
+import { KerucutInstructionPanel } from '@/components/3d-builder/instruction-panel/KerucutInstructionPanel';
 
-export default function TabungBuildChallenge() {
+export default function KerucutBuildChallenge() {
   const router = useRouter();
   const instructionPanelRef = useRef(null);
   const [isMobile, setIsMobile] = useState(false);
   const [customSizes, setCustomSizes] = useState({
-    large: { radius: 5, height: 15 },
-    medium: { radius: 4, height: 12 },
-    small: { radius: 3, height: 10 }
+    base: { radius: 12, height: 10 },
+    body: { radius: 5, height: 25 },
+    nose: { radius: 5, height: 12 }
   });
   const [validationErrors, setValidationErrors] = useState({});
   const [sizesConfirmed, setSizesConfirmed] = useState(false);
@@ -60,40 +60,22 @@ export default function TabungBuildChallenge() {
   useEffect(() => {
     const errors = {};
     
-    // Medium must be smaller than Large
-    if (customSizes.medium.radius >= customSizes.large.radius) {
-      errors.mediumRadius = 'Jari-jari Sedang harus lebih kecil dari Besar';
+    // Base radius must be larger than body/nose
+    if (customSizes.base.radius <= customSizes.body.radius) {
+      errors.baseRadius = 'Jari-jari kerucut dasar harus lebih besar dari badan roket!';
     }
-    if (customSizes.medium.height >= customSizes.large.height) {
-      errors.mediumHeight = 'Tinggi Sedang harus lebih kecil dari Besar';
-    }
-    
-    // Small must be smaller than Medium
-    if (customSizes.small.radius >= customSizes.medium.radius) {
-      errors.smallRadius = 'Jari-jari Kecil harus lebih kecil dari Sedang';
-    }
-    if (customSizes.small.height >= customSizes.medium.height) {
-      errors.smallHeight = 'Tinggi Kecil harus lebih kecil dari Sedang';
+    if (customSizes.base.radius <= customSizes.nose.radius) {
+      errors.baseRadius2 = 'Jari-jari kerucut dasar harus lebih besar dari hidung roket!';
     }
     
-    // Min/Max validation (1-20 range)
-    if (customSizes.large.radius < 3 || customSizes.large.radius > 20) {
-      errors.largeRadius = 'Jari-jari Besar: 3-20';
+    // Body and nose radius should match
+    if (customSizes.body.radius !== customSizes.nose.radius) {
+      errors.alignment = 'Jari-jari badan roket dan hidung harus sama untuk struktur stabil!';
     }
-    if (customSizes.large.height < 5 || customSizes.large.height > 30) {
-      errors.largeHeight = 'Tinggi Besar: 5-30';
-    }
-    if (customSizes.medium.radius < 2 || customSizes.medium.radius > 19) {
-      errors.mediumRadiusRange = 'Jari-jari Sedang: 2-19';
-    }
-    if (customSizes.medium.height < 4 || customSizes.medium.height > 29) {
-      errors.mediumHeightRange = 'Tinggi Sedang: 4-29';
-    }
-    if (customSizes.small.radius < 1 || customSizes.small.radius > 18) {
-      errors.smallRadiusRange = 'Jari-jari Kecil: 1-18';
-    }
-    if (customSizes.small.height < 3 || customSizes.small.height > 28) {
-      errors.smallHeightRange = 'Tinggi Kecil: 3-28';
+    
+    // Reasonable height ratios
+    if (customSizes.body.height < customSizes.base.height + customSizes.nose.height) {
+      errors.proportion = 'Tinggi badan roket harus lebih besar dari total tinggi kedua kerucut!';
     }
     
     setValidationErrors(errors);
@@ -105,7 +87,7 @@ export default function TabungBuildChallenge() {
   const targetGroupRef = useRef(null);
   
   // Initialize shape builder
-  const shapeBuilder = useMemo(() => new CylinderBuilder(false), []);
+  const shapeBuilder = useMemo(() => new ConeBuilder(false), []);
   
   // State management
   const {
@@ -125,7 +107,7 @@ export default function TabungBuildChallenge() {
     resetState,
     markComponentSpawned,
     markPartFilled
-  } = useBuilderState(cylinderBlueprint);
+  } = useBuilderState(rocketBaseBlueprint);
   
   // Hotspot zones management
   const {
@@ -135,7 +117,7 @@ export default function TabungBuildChallenge() {
     hideHotspotsForItem
   } = useHotspotZones(
     sceneRef,
-    cylinderBlueprint,
+    rocketBaseBlueprint,
     shapeBuilder,
     selectedSize,
     itemParts
@@ -143,7 +125,7 @@ export default function TabungBuildChallenge() {
   
   // Completion checking
   const { checkCompletion, analyzeBuilding } = useCompletionCheck(
-    cylinderBlueprint,
+    rocketBaseBlueprint,
     itemParts,
     shapeBuilder,
     selectedSize,
@@ -155,11 +137,11 @@ export default function TabungBuildChallenge() {
   /**
    * Handle custom size change
    */
-  const handleSizeChange = useCallback((cylinderType, dimension, value) => {
+  const handleSizeChange = useCallback((componentType, dimension, value) => {
     setCustomSizes(prev => ({
       ...prev,
-      [cylinderType]: {
-        ...prev[cylinderType],
+      [componentType]: {
+        ...prev[componentType],
         [dimension]: value
       }
     }));
@@ -171,7 +153,7 @@ export default function TabungBuildChallenge() {
   const handleConfirmSizes = useCallback(() => {
     if (Object.keys(validationErrors).length === 0) {
       setSizesConfirmed(true);
-      setCompletionMessage('✅ Ukuran dikonfirmasi! Sekarang spawn komponen untuk mulai merakit.');
+      setCompletionMessage('✅ Ukuran dikonfirmasi! Sekarang spawn komponen untuk mulai merakit roket.');
     }
   }, [validationErrors, setCompletionMessage]);
   
@@ -215,7 +197,7 @@ export default function TabungBuildChallenge() {
     // Get spawn position
     const spawnPos = shapeBuilder.getSpawnPosition(
       partType,
-      cylinderBlueprint.spawnConfig
+      rocketBaseBlueprint.spawnConfig
     );
     
     mesh.position.set(spawnPos.x, spawnPos.y, spawnPos.z);
@@ -230,11 +212,12 @@ export default function TabungBuildChallenge() {
     // Clear warning state
     setShowSizeWarning(false);
     
-    const typeName = partType === 'circle' ? 'Lingkaran' : 'Selimut';
-    const sizeName = componentType.includes('large') ? 'Besar' : 
-                     componentType.includes('medium') ? 'Sedang' : 'Kecil';
+    const typeName = partType === 'circle' ? 'Lingkaran' : 
+                     partType === 'sector' ? 'Juring' : 'Selimut';
+    const itemName = componentType.includes('base') ? 'Kerucut Dasar' : 
+                     componentType.includes('body') ? 'Badan Roket' : 'Hidung Roket';
     
-    setCompletionMessage(`${typeName} ${sizeName} ditambahkan. Drag ke hotspot yang sesuai!`);
+    setCompletionMessage(`${typeName} ${itemName} ditambahkan. Drag ke hotspot yang sesuai!`);
   }, [shapeBuilder, selectedSize, spawnedComponents, markComponentSpawned, setCompletionMessage, sizesConfirmed]);
   
   /**
@@ -245,7 +228,8 @@ export default function TabungBuildChallenge() {
     setCompletionMessage(`✅ ${
       partId === 'bottom' ? 'Alas' : 
       partId === 'top' ? 'Tutup' : 
-      'Selimut'
+      partId === 'side' ? 'Selimut' :
+      'Komponen'
     } terpasang!`);
   }, [markPartFilled, setCompletionMessage]);
   
@@ -286,11 +270,11 @@ export default function TabungBuildChallenge() {
    */
   const goToLearnResult = useCallback(() => {
     const buildResult = {
-      challengeType: 'tower-cylinder-2d',
+      challengeType: 'rocket-cone-2d',
       completed: true,
       completedAt: new Date().toISOString(),
       method: '2D Assembly',
-      customSizes: customSizes, // Include custom sizes
+      customSizes: customSizes,
       items: itemParts.map((parts, index) => ({
         index,
         parts: Object.entries(parts).map(([id, data]) => ({
@@ -299,8 +283,8 @@ export default function TabungBuildChallenge() {
         }))
       }))
     };
-    localStorage.setItem('lastBuildResult', JSON.stringify(buildResult));
-    router.push('/materi-pembelajaran/tabung/learn-result');
+    localStorage.setItem('kerucutBuildResult', JSON.stringify(buildResult));
+    router.push('/materi-pembelajaran/kerucut/learn-result');
   }, [router, itemParts, customSizes]);
 
   return (
@@ -308,15 +292,15 @@ export default function TabungBuildChallenge() {
       {/* Header - More Compact */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-4 py-3 shadow-lg">
         <div className="flex items-center justify-between max-w-7xl mx-auto">
-          <Link href="/materi-pembelajaran/tabung">
+          <Link href="/materi-pembelajaran">
             <button className="flex items-center space-x-2 text-white hover:text-blue-200 transition-colors">
               <span className="text-xl">←</span>
               <span className="font-medium hidden sm:inline">Kembali</span>
             </button>
           </Link>
           <div className="text-center flex-1">
-            <h1 className="text-lg sm:text-xl font-bold">🧩 Build Challenge Tabung</h1>
-            <p className="text-xs text-blue-100 hidden sm:block">Mode Kreatif - Rakit Menara</p>
+            <h1 className="text-lg sm:text-xl font-bold">🚀 Build Challenge Roket</h1>
+            <p className="text-xs text-blue-100 hidden sm:block">Mode Kreatif - Rakit Peluncur</p>
           </div>
           <div className="w-20"></div>
         </div>
@@ -331,13 +315,13 @@ export default function TabungBuildChallenge() {
           {/* Main Content Area */}
           <div className="space-y-4">
             
-            {/* Target Example - Improved Visual */}
+            {/* Target Example - Rocket Visual */}
             <div className="bg-white rounded-2xl p-4 shadow-lg">
               <div className="flex items-center space-x-2 mb-3">
                 <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
                   <span className="text-white text-sm">🎯</span>
                 </div>
-                <h2 className="font-semibold text-gray-800">Target: Menara Tabung Bertingkat</h2>
+                <h2 className="font-semibold text-gray-800">Target: Roket Peluncur Mini</h2>
               </div>
               
               <div className="bg-gradient-to-br from-slate-800 via-slate-700 to-slate-900 border-2 border-slate-600 rounded-xl p-8 min-h-[180px] flex items-center justify-center relative overflow-hidden">
@@ -348,143 +332,13 @@ export default function TabungBuildChallenge() {
                 }}></div>
                 
                 <div className="text-center relative z-10">
-                  {/* Menara Tabung Polos - Clean Cylinder Stack */}
-                  <div className="relative mx-auto mb-4" style={{ width: '90px', height: '165px' }}>
-                    
-                    {/* Tabung Kecil (Atas) - Red/Merah - Plain Cylinder */}
-                    <div className="absolute bottom-[115px] left-1/2 transform -translate-x-1/2">
-                      {/* Top Circle */}
-                      <div 
-                        className="absolute -top-1 left-1/2 transform -translate-x-1/2 rounded-full z-10"
-                        style={{
-                          width: '36px',
-                          height: '8px',
-                          background: 'radial-gradient(ellipse at 50% 35%, #FF8B7A 0%, #FF5942 50%, #D94532 100%)',
-                          boxShadow: '0 2px 6px rgba(255, 89, 66, 0.6)'
-                        }}
-                      />
-                      {/* Cylinder Body */}
-                      <div 
-                        className="relative overflow-hidden"
-                        style={{
-                          width: '36px',
-                          height: '44px',
-                          background: 'linear-gradient(to right, #D94532 0%, #FF5942 45%, #FF5942 55%, #D94532 100%)',
-                          boxShadow: `
-                            0 6px 14px rgba(255, 89, 66, 0.5),
-                            inset -3px 0 6px rgba(0, 0, 0, 0.25),
-                            inset 3px 0 6px rgba(255, 255, 255, 0.15)
-                          `
-                        }}
-                      >
-                        {/* Highlight stripe */}
-                        <div className="absolute inset-y-0 left-[40%] w-[20%] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                      </div>
-                      {/* Bottom Circle */}
-                      <div 
-                        className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 rounded-full"
-                        style={{
-                          width: '36px',
-                          height: '7px',
-                          background: 'radial-gradient(ellipse at 50% 65%, #D94532 0%, #B8371F 50%, #8B2514 100%)',
-                          boxShadow: 'inset 0 1px 3px rgba(0, 0, 0, 0.4)'
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Tabung Sedang (Tengah) - Blue/Biru - Plain Cylinder */}
-                    <div className="absolute bottom-[60px] left-1/2 transform -translate-x-1/2">
-                      {/* Top Circle */}
-                      <div 
-                        className="absolute -top-1 left-1/2 transform -translate-x-1/2 rounded-full z-10"
-                        style={{
-                          width: '52px',
-                          height: '10px',
-                          background: 'radial-gradient(ellipse at 50% 35%, #6B9FFF 0%, #4169E1 50%, #2E4DB8 100%)',
-                          boxShadow: '0 3px 8px rgba(65, 105, 225, 0.6)'
-                        }}
-                      />
-                      {/* Cylinder Body */}
-                      <div 
-                        className="relative overflow-hidden"
-                        style={{
-                          width: '52px',
-                          height: '50px',
-                          background: 'linear-gradient(to right, #2E4DB8 0%, #4169E1 45%, #4169E1 55%, #2E4DB8 100%)',
-                          boxShadow: `
-                            0 8px 18px rgba(65, 105, 225, 0.5),
-                            inset -4px 0 8px rgba(0, 0, 0, 0.25),
-                            inset 4px 0 8px rgba(255, 255, 255, 0.15)
-                          `
-                        }}
-                      >
-                        {/* Highlight stripe */}
-                        <div className="absolute inset-y-0 left-[40%] w-[20%] bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                      </div>
-                      {/* Bottom Circle */}
-                      <div 
-                        className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 rounded-full"
-                        style={{
-                          width: '52px',
-                          height: '9px',
-                          background: 'radial-gradient(ellipse at 50% 65%, #2E4DB8 0%, #1E3A8A 50%, #14285C 100%)',
-                          boxShadow: 'inset 0 1px 4px rgba(0, 0, 0, 0.4)'
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Tabung Besar (Bawah) - Brown/Coklat - Plain Cylinder */}
-                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2">
-                      {/* Top Circle */}
-                      <div 
-                        className="absolute -top-1.5 left-1/2 transform -translate-x-1/2 rounded-full z-10"
-                        style={{
-                          width: '70px',
-                          height: '13px',
-                          background: 'radial-gradient(ellipse at 50% 35%, #B8864D 0%, #8B5A2B 50%, #6B4423 100%)',
-                          boxShadow: '0 4px 10px rgba(139, 90, 43, 0.6)'
-                        }}
-                      />
-                      {/* Cylinder Body */}
-                      <div 
-                        className="relative overflow-hidden"
-                        style={{
-                          width: '70px',
-                          height: '60px',
-                          background: 'linear-gradient(to right, #6B4423 0%, #8B5A2B 45%, #8B5A2B 55%, #6B4423 100%)',
-                          boxShadow: `
-                            0 10px 22px rgba(139, 90, 43, 0.6),
-                            inset -5px 0 10px rgba(0, 0, 0, 0.3),
-                            inset 5px 0 10px rgba(255, 255, 255, 0.1)
-                          `
-                        }}
-                      >
-                        {/* Highlight stripe */}
-                        <div className="absolute inset-y-0 left-[40%] w-[20%] bg-gradient-to-r from-transparent via-white/15 to-transparent"></div>
-                      </div>
-                      {/* Bottom Circle */}
-                      <div 
-                        className="absolute -bottom-1.5 left-1/2 transform -translate-x-1/2 rounded-full"
-                        style={{
-                          width: '70px',
-                          height: '11px',
-                          background: 'radial-gradient(ellipse at 50% 65%, #6B4423 0%, #4A2F1A 50%, #2D1B0F 100%)',
-                          boxShadow: 'inset 0 2px 5px rgba(0, 0, 0, 0.5)'
-                        }}
-                      />
-                    </div>
-                    
-                    {/* Floor shadow */}
-                    <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-24 h-4 bg-black/25 rounded-full blur-lg"></div>
-                  </div>
-                  
                   <div className="space-y-2">
-                    <h3 className="font-bold text-white text-base drop-shadow-lg">🎯 Menara 3 Tingkat</h3>
+                    <h3 className="font-bold text-white text-base drop-shadow-lg">🚀 Roket 3 Bagian</h3>
                     <p className="text-xs text-slate-300 leading-relaxed max-w-md mx-auto">
-                      Susun dari besar ke kecil:<br/>
-                      <span className="inline-flex items-center gap-1 font-semibold text-amber-400">🟫 Coklat</span> → 
-                      <span className="inline-flex items-center gap-1 font-semibold text-blue-300 mx-1">🟦 Biru</span> → 
-                      <span className="inline-flex items-center gap-1 font-semibold text-red-400">🟥 Merah</span>
+                      Susun dari bawah ke atas:<br/>
+                      <span className="inline-flex items-center gap-1 font-semibold text-orange-400">🟧 Kerucut Dasar</span> → 
+                      <span className="inline-flex items-center gap-1 font-semibold text-gray-300 mx-1">⬜ Badan Tabung</span> → 
+                      <span className="inline-flex items-center gap-1 font-semibold text-red-400">🟥 Hidung Kerucut</span>
                     </p>
                   </div>
                 </div>
@@ -492,7 +346,7 @@ export default function TabungBuildChallenge() {
             </div>
 
             {/* Instruction & Customization Panel */}
-            <InstructionPanel
+            <KerucutInstructionPanel
               ref={instructionPanelRef}
               customSizes={customSizes}
               onSizeChange={handleSizeChange}
@@ -526,7 +380,7 @@ export default function TabungBuildChallenge() {
                   <div className="w-[280px] flex-shrink-0">
                     <div className="h-full">
                       <ComponentPanel
-                        blueprint={cylinderBlueprint}
+                        blueprint={rocketBaseBlueprint}
                         spawnedComponents={spawnedComponents}
                         onSpawnComponent={handleSpawnComponent}
                         compact={true}
@@ -538,7 +392,7 @@ export default function TabungBuildChallenge() {
                 {/* Main 3D Scene Area (80% desktop, 100% mobile) */}
                 <div className={`${isMobile ? 'w-full h-full' : 'flex-1'} relative`}>
                   <BuilderScene
-                    blueprint={cylinderBlueprint}
+                    blueprint={rocketBaseBlueprint}
                     shapeBuilder={shapeBuilder}
                     sceneRef={sceneRef}
                     draggableObjectsRef={draggableObjectsRef}
@@ -556,7 +410,7 @@ export default function TabungBuildChallenge() {
                   {isMobile && (
                     <div className="absolute bottom-0 left-0 right-0 z-10">
                       <FloatingComponentMenu
-                        blueprint={cylinderBlueprint}
+                        blueprint={rocketBaseBlueprint}
                         spawnedComponents={spawnedComponents}
                         onSpawnComponent={handleSpawnComponent}
                       />
@@ -572,7 +426,8 @@ export default function TabungBuildChallenge() {
                     ✨ Drop di sini untuk pasang {
                       hoveredZone.zoneType === 'bottom' ? 'Alas' : 
                       hoveredZone.zoneType === 'top' ? 'Tutup' : 
-                      'Selimut'
+                      hoveredZone.zoneType === 'side' ? 'Selimut' :
+                      'Komponen'
                     }!
                   </p>
                 </div>
@@ -580,7 +435,7 @@ export default function TabungBuildChallenge() {
               
               {/* Progress Indicator */}
               <ProgressTracker
-                blueprint={cylinderBlueprint}
+                blueprint={rocketBaseBlueprint}
                 itemParts={itemParts}
               />
               

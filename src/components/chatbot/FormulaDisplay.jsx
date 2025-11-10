@@ -15,7 +15,7 @@ const FormulaDisplay = ({ content }) => {
         .replace(/⅓/g, '<sup class="text-sm">1</sup>/<sub class="text-xs">3</sub>')
         .replace(/½/g, '<sup class="text-sm">1</sup>/<sub class="text-xs">2</sub>');
 
-      // Highlight formulas
+      // Highlight formulas (equations with =)
       if (line.includes('=') && (line.includes('V') || line.includes('L') || line.includes('r') || line.includes('t'))) {
         return (
           <div 
@@ -26,19 +26,22 @@ const FormulaDisplay = ({ content }) => {
         );
       }
 
-      // Bold headers
-      if (line.startsWith('**') && line.endsWith('**')) {
+      // Bold headers (full line with **)
+      if (line.trim().startsWith('**') && line.trim().endsWith('**')) {
         return (
-          <div key={index} className="font-bold text-blue-600 mt-3 mb-1">
+          <div key={index} className="font-bold text-blue-700 mt-3 mb-1 text-base">
             {line.replace(/\*\*/g, '')}
           </div>
         );
       }
 
+      // Inline bold (partial **text** within line)
+      formattedLine = formattedLine.replace(/\*\*(.*?)\*\*/g, '<strong class="font-semibold text-gray-900">$1</strong>');
+
       // List items
       if (line.startsWith('•')) {
         return (
-          <div key={index} className="ml-4 flex items-start">
+          <div key={index} className="ml-4 flex items-start my-1">
             <span className="text-blue-500 mr-2">•</span>
             <span dangerouslySetInnerHTML={{ __html: formattedLine.substring(1).trim() }} />
           </div>
@@ -58,7 +61,7 @@ const FormulaDisplay = ({ content }) => {
       return (
         <div 
           key={index} 
-          className={line.trim() === '' ? 'h-2' : ''}
+          className={line.trim() === '' ? 'h-2' : 'leading-relaxed'}
           dangerouslySetInnerHTML={{ __html: formattedLine || '&nbsp;' }}
         />
       );

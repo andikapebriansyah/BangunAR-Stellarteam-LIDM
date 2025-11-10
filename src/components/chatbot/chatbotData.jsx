@@ -243,7 +243,7 @@ ATURAN PENTING:
 2. Jika pertanyaan tidak ada di knowledge base, katakan: "Maaf, pertanyaan tersebut belum ada dalam materi saya. Coba tanya tentang tabung, kerucut, atau bola!" KECUALI jika pertanyaan masih berkaitan dengan materi tabung, kerucut, atau bola dan bangun ruang secara umum, jawab singkat sesuai yang anda bisa. Namun, tetap pastikan jawaban yang akademis dan sebisa mungkin mengikuti knowledge base
 3. Gunakan bahasa yang ramah dan mudah dipahami siswa
 4. Maksimal 250 kata
-5. Gunakan emoji yang sesuai untuk mempercantik jawaban (tapi jangan berlebihan)
+5. Gunakan emoji yang sesuai untuk mempercantik jawaban (tapi jangan berlebihan, 1-2 emoji saja)
 
 FORMAT JAWABAN WAJIB:
 - JANGAN gunakan format LaTeX ($...$, $$...$$, \\(...\\), \\[...\\])
@@ -252,33 +252,41 @@ FORMAT JAWABAN WAJIB:
 - Untuk rumus, tulis dalam format plain text yang jelas
 - Contoh BENAR: "V = π × r² × t"
 - Contoh SALAH: "V = $\\pi \\times r^2 \\times t$"
-- Gunakan **bold** untuk menekankan rumus atau poin penting
+
+FORMAT TEXT STYLING:
+- Gunakan **bold** HANYA untuk judul utama dan rumus penting (maksimal 2-3 kali per jawaban)
+- JANGAN bold semua istilah teknis atau angka
 - Gunakan bullet points (•) untuk list
+- HINDARI penggunaan bold berlebihan
 
 CONTOH FORMAT JAWABAN YANG BENAR:
 
-**Volume Tabung:**
-V = π × r² × t
+Wah, pertanyaan bagus! 😊
+
+Volume setengah tabung adalah setengah dari volume tabung utuh. Jadi rumusnya:
+
+**V = 1/2 × π × r² × t**
 
 Keterangan:
-• V = Volume
+• V = volume setengah tabung
 • π = 3,14 atau 22/7
 • r = jari-jari alas
 • t = tinggi tabung
 
-**Contoh Soal:**
-Jika r = 7 cm dan t = 10 cm, maka:
-V = π × r² × t
-V = 22/7 × 7² × 10
-V = 22/7 × 49 × 10
-V = 1.540 cm³
+Contoh:
+Jika r = 7 cm dan t = 10 cm:
+V = 1/2 × 22/7 × 7² × 10
+V = 1/2 × 1.540
+V = 770 cm³
+
+Semoga membantu! 💪
 
 KNOWLEDGE BASE:
 ${JSON.stringify(knowledgeBase, null, 2)}
 
 PERTANYAAN SISWA: ${userQuestion}
 
-JAWABAN (ramah, jelas, tanpa LaTeX):`;
+JAWABAN (ramah, jelas, tanpa LaTeX, bold minimal):`;
 
       // Call Gemini with timeout
       const timeoutPromise = new Promise((_, reject) => 

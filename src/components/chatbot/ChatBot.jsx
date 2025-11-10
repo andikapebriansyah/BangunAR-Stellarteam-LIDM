@@ -43,6 +43,7 @@ const ChatBot = () => {
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [isQuickActionsOpen, setIsQuickActionsOpen] = useState(true);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -143,26 +144,17 @@ const ChatBot = () => {
     inputRef.current?.focus();
   };
 
-  // Quick reply buttons - made more comprehensive
-  const quickReplies = [
-    "Apa itu tabung?",
-    "Rumus volume tabung", 
-    "Contoh soal kerucut",
-    "Luas permukaan bola",
-    "Latihan mudah",
-    "Tips dan trik",
-    "Visualisasi",
-    "Bantuan"
-  ];
-
-  // Action buttons for specific functions
-  const actionButtons = [
+  // Combined quick actions - menggabungkan suggestions dengan action buttons
+  const quickActions = [
     { text: "📐 Rumus Lengkap", query: "rumus lengkap tabung" },
     { text: "🎯 Latihan Soal", query: "latihan soal volume" },
-    { text: "🎨 Visualisasi", query: "visualisasi tabung" },
     { text: "💡 Tips", query: "tips menghitung volume" },
     { text: "🌟 Tantangan", query: "tantangan sulit" },
-    { text: "📊 Perbandingan", query: "perbandingan volume tabung kerucut" }
+    { text: "📊 Perbandingan", query: "perbandingan volume tabung kerucut" },
+    { text: "Apa itu tabung?", query: "apa itu tabung" },
+    { text: "Rumus volume tabung", query: "rumus volume tabung" },
+    { text: "Contoh soal kerucut", query: "contoh soal kerucut" },
+    { text: "Luas permukaan bola", query: "luas permukaan bola" }
   ];
 
   // Format message content (handle line breaks, formulas, etc.)
@@ -195,9 +187,9 @@ const ChatBot = () => {
             onClick={() => setIsOpen(false)}
           ></div>
           
-          {/* Chat Container - Responsive centering */}
+          {/* Chat Container - Responsive centering with fixed height */}
           <div 
-            className="relative w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden max-h-[85vh] md:max-h-[600px] transform transition-all duration-300"
+            className="relative w-full max-w-md mx-auto bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden h-[85vh] md:h-[600px] transform transition-all duration-300"
             style={{ animation: 'fadeInScale 0.3s ease-out' }}
           >
             
@@ -266,50 +258,46 @@ const ChatBot = () => {
               <div ref={messagesEndRef} />
             </div>
 
-            {/* Action Buttons */}
-            <div className="px-4 py-3 bg-gradient-to-r from-blue-50 to-cyan-50 border-t border-gray-200">
-              <p className="text-xs text-gray-600 mb-3 font-medium">🚀 Quick Actions:</p>
-              <div className="grid grid-cols-2 gap-2 mb-2">
-                {actionButtons.slice(0, 4).map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickReply(action.query)}
-                    className="px-2 py-2 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-700 text-xs rounded-lg transition-all duration-200 flex items-center justify-center space-x-1 min-h-[32px]"
-                  >
-                    <span className="text-center leading-tight">{action.text}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="flex justify-center space-x-2">
-                {actionButtons.slice(4).map((action, index) => (
-                  <button
-                    key={index}
-                    onClick={() => handleQuickReply(action.query)}
-                    className="px-3 py-1 bg-gradient-to-r from-purple-100 to-pink-100 hover:from-purple-200 hover:to-pink-200 border border-purple-200 text-purple-700 text-xs rounded-full transition-all duration-200"
-                  >
-                    {action.text}
-                  </button>
-                ))}
-              </div>
-            </div>
+            {/* Collapsible Quick Actions */}
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 border-t border-gray-200">
+              {/* Toggle Header */}
+              <button
+                onClick={() => setIsQuickActionsOpen(!isQuickActionsOpen)}
+                className="w-full px-4 py-2 flex items-center justify-between hover:bg-blue-100/50 transition-colors"
+              >
+                <span className="text-xs text-gray-700 font-medium">🚀 Quick Actions</span>
+                <svg 
+                  className={`w-4 h-4 text-gray-600 transition-transform duration-300 ${isQuickActionsOpen ? '' : 'rotate-180'}`}
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
 
-            {/* Quick Replies */}
-            {messages.length <= 2 && (
-              <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
-                <p className="text-xs text-gray-600 mb-2">💡 Coba tanya:</p>
-                <div className="flex flex-wrap gap-2">
-                  {quickReplies.slice(0, 4).map((reply, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleQuickReply(reply)}
-                      className="px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs rounded-full transition-colors"
-                    >
-                      {reply}
-                    </button>
-                  ))}
+              {/* Collapsible Content */}
+              <div 
+                className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                  isQuickActionsOpen ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'
+                }`}
+              >
+                <div className="px-4 pb-3">
+                  {/* Grid Layout for Quick Actions */}
+                  <div className="grid grid-cols-2 gap-2">
+                    {quickActions.map((action, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleQuickReply(action.query)}
+                        className="px-2 py-2 bg-white hover:bg-blue-50 border border-blue-200 hover:border-blue-300 text-blue-700 text-xs rounded-lg transition-all duration-200 flex items-center justify-center text-center leading-tight min-h-[36px]"
+                      >
+                        {action.text}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
-            )}
+            </div>
 
             {/* Input Area */}
             <form onSubmit={handleSendMessage} className="p-4 bg-white border-t border-gray-200">
@@ -332,18 +320,6 @@ const ChatBot = () => {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
                   </svg>
                 </button>
-              </div>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {quickReplies.slice(-2).map((reply, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => handleQuickReply(reply)}
-                    className="px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded-full transition-colors"
-                  >
-                    {reply}
-                  </button>
-                ))}
               </div>
             </form>
           </div>
